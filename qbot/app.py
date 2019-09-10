@@ -1,5 +1,7 @@
 import hashlib
 import hmac
+import os
+from datetime import datetime
 
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -7,7 +9,13 @@ from starlette.responses import PlainTextResponse
 
 app = Starlette()
 
-SIGNING_SECRET = ""
+SIGNING_SECRET = os.environ.get("QBOT_SIGNING_SECRET")
+
+
+@app.route("/")
+async def index(request: Request):
+    current_date = datetime.utcnow()
+    return PlainTextResponse(f"Qbot\n{current_date}")
 
 
 @app.route("/slack")
