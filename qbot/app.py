@@ -1,23 +1,21 @@
 import hashlib
 import hmac
-import os
 
-from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
-app = Starlette()
+from qbot.registry import registry
+from qbot.slack_commands import *  # noqa
+from qbot.slack_handlers import *  # noqa
+from qbot.slack_utils import event_type_mapping
 
-GIT_REV = os.environ.get("GIT_REV", "N/A")
-SIGNING_SECRET = os.environ.get("Q_SIGNING_SECRET")
 
-
-@app.route("/")
+@registry.app.route("/")
 async def index(request: Request):
-    return PlainTextResponse(f"Qbot::{GIT_REV[:8]}")
+    return PlainTextResponse(f"Qbot::{registry.REVISION}")
 
 
-@app.route("/slack", methods=["POST"])
+@registry.app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
     try:
         if not await verify_signature(request):
@@ -28,6 +26,10 @@ async def slack_handler(request: Request):
     data = await request.json()
     if "challenge" in data:
         return PlainTextResponse(data["challenge"], 200)
+
+    slack_event = data["event"]
+    event_type_mapping[slack_event["type"]](slack_event)
+
     return PlainTextResponse("OK", 200)
 
 
@@ -43,6 +45,7 @@ async def verify_signature(request: Request):
 
     req = str.encode("v0:" + str(timestamp) + ":") + body
     request_hash = (
-        "v0=" + hmac.new(str.encode(SIGNING_SECRET), req, hashlib.sha256).hexdigest()
+        "v0="
+        + hmac.new(str.encode(registry.SIGNING_SECRET), req, hashlib.sha256).hexdigest()
     )
     return hmac.compare_digest(request_hash, signature)
