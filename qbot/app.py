@@ -17,7 +17,7 @@ async def index(request: Request):
     return PlainTextResponse(f"Qbot::{GIT_REV}")
 
 
-@app.route("/slack")
+@app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
     if not await verify_signature(request):
         return PlainTextResponse("Incorrect signature.", 403)
