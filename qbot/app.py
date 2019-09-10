@@ -1,21 +1,23 @@
 import hashlib
 import hmac
 
+from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
-from qbot.registry import registry
 from qbot.slack_commands import *  # noqa
 from qbot.slack_handlers import *  # noqa
 from qbot.slack_utils import event_type_mapping
 
+app = Starlette()
 
-@registry.app.route("/")
+
+@app.route("/")
 async def index(request: Request):
     return PlainTextResponse(f"Qbot::{registry.REVISION}")
 
 
-@registry.app.route("/slack", methods=["POST"])
+@app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
     try:
         if not await verify_signature(request):
