@@ -1,5 +1,3 @@
-import os
-
 from qbot.registry import registry
 from qbot.slack_utils import keyword_to_description, slack_keyword
 
@@ -13,9 +11,8 @@ def ping(text: str, **kwargs) -> str:
 def help_message(text: str, **kwargs) -> str:
     info = (
         f"*Qbot rev. {registry.REVISION}*\n"
-        "*Last deploy:* {}\n"
         "*Repository:* https://github.com/landmaj/qbot"
-    ).format(os.environ.get("DEPLOY_DATE"))
+    )
     commands = "\n".join(
         [f"*!{key}*: {value}" for key, value in keyword_to_description.items()]
     )
