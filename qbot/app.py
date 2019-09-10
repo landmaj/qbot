@@ -14,13 +14,16 @@ SIGNING_SECRET = os.environ.get("Q_SIGNING_SECRET")
 
 @app.route("/")
 async def index(request: Request):
-    return PlainTextResponse(f"Qbot::{GIT_REV}")
+    return PlainTextResponse(f"Qbot::{GIT_REV[:8]}")
 
 
 @app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
-    if not await verify_signature(request):
-        return PlainTextResponse("Incorrect signature.", 403)
+    try:
+        if not await verify_signature(request):
+            return PlainTextResponse("Incorrect signature.", 403)
+    except Exception:
+        return PlainTextResponse("Could not verify signature.", 400)
 
     data = await request.json()
     if "challenge" in data:
@@ -34,8 +37,8 @@ async def verify_signature(request: Request):
     calculated from the app's signing secret and request data.
     """
 
-    timestamp = request.headers.get("X-Slack-Request-Timestamp")
-    signature = request.headers.get("X-Slack-Signature")
+    timestamp = request.headers["X-Slack-Request-Timestamp"]
+    signature = request.headers["X-Slack-Signature"]
     body = await request.body()
 
     req = str.encode("v0:" + str(timestamp) + ":") + body
