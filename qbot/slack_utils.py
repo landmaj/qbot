@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 async def send_message(message: str, channel_id: str) -> None:
+    data = {"token": registry.SLACK_TOKEN, "channel": channel_id, "text": message}
     async with registry.http_session.post(
-        url=urljoin(SLACK_URL, "chat.postMessage"),
-        data={"token": registry.SLACK_TOKEN, "channel": channel_id, "text": message},
+        url=urljoin(SLACK_URL, "chat.postMessage"), data=data
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
@@ -25,7 +25,7 @@ async def send_message(message: str, channel_id: str) -> None:
         body = await resp.json()
         if not body["ok"]:
             error = body["error"]
-            logger.error(f"Slack returned an error: {error}.")
+            logger.error(f"Slack returned an error: {error}. Request body: {data}.")
 
 
 async def send_image(image_url: str, alt_text: str, channel_id: str) -> None:
@@ -43,7 +43,7 @@ async def send_image(image_url: str, alt_text: str, channel_id: str) -> None:
         body = await resp.json()
         if not body["ok"]:
             error = body["error"]
-            logger.error(f"Slack returned an error: {error}.")
+            logger.error(f"Slack returned an error: {error}. Request body: {data}.")
 
 
 def event_handler(event_type: str):
