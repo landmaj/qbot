@@ -1,4 +1,6 @@
+import logging
 from functools import wraps
+from typing import Optional
 from urllib.parse import urljoin
 
 from qbot.registry import registry
@@ -10,12 +12,32 @@ keyword_to_description = {}
 event_type_mapping = {}
 
 
-async def send_slack_message(message: str, channel_id: str) -> None:
+logger = logging.getLogger(__name__)
+
+
+async def send_message(message: str, channel_id: str) -> None:
     async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
         data={"token": registry.SLACK_TOKEN, "channel": channel_id, "text": message},
     ) as resp:
-        pass
+        if not 200 <= resp.status < 400:
+            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+
+
+async def send_image(
+    image_url: str, channel_id: str, title: Optional[str] = None
+) -> None:
+    data = {
+        "channel": channel_id,
+        "blocks": [{"type": "image", "image_url": image_url}],
+    }
+    if title:
+        data["blocks"][0]["title"] = {"type": "plain_text", "text": title}
+    async with registry.http_session.post(
+        url=urljoin(SLACK_URL, "chat.postMessage"), data=data
+    ) as resp:
+        if not 200 <= resp.status < 400:
+            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
 
 
 def event_handler(event_type: str):
