@@ -24,8 +24,14 @@ async def nosacz(text: str, channel_id: str, **kwargs):
         image_url = (
             soup.find("div", {"class": "img-inner-box"}).find("a").find("img")["src"]
         )
+        alt_text = (
+            soup.find("div", {"class": "image-box"})
+            .find("h2")
+            .get_text()
+            .split("\n")[0]
+        )
     except Exception:
         logger.exception("Could not extract image source from the page.")
         await send_message("Źródełko wyschło. :(", channel_id)
         return
-    await send_image(image_url, channel_id, "Memiszcze")
+    await send_image(image_url, alt_text, channel_id)

@@ -1,6 +1,5 @@
 import logging
 from functools import wraps
-from typing import Optional
 from urllib.parse import urljoin
 
 from qbot.registry import registry
@@ -29,16 +28,12 @@ async def send_message(message: str, channel_id: str) -> None:
             logger.error(f"Slack returned an error: {error}.")
 
 
-async def send_image(
-    image_url: str, channel_id: str, title: Optional[str] = None
-) -> None:
+async def send_image(image_url: str, alt_text: str, channel_id: str) -> None:
     data = {
         "channel": channel_id,
         "token": registry.SLACK_TOKEN,
-        "blocks": [{"type": "image", "image_url": image_url}],
+        "blocks": [{"type": "image", "image_url": image_url, "alt_text": alt_text}],
     }
-    if title:
-        data["blocks"][0]["title"] = {"type": "plain_text", "text": title}
     async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"), data=data
     ) as resp:
