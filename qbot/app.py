@@ -23,7 +23,7 @@ def load_plugins():
 
 
 @app.on_event("startup")
-def setup_registry():
+async def setup_registry():
     await registry.setup()
 
 

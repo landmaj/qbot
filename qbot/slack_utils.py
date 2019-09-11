@@ -10,7 +10,7 @@ keyword_to_description = {}
 event_type_mapping = {}
 
 
-def send_slack_message(message: str, channel_id: str) -> None:
+async def send_slack_message(message: str, channel_id: str) -> None:
     async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
         data={"token": registry.SLACK_TOKEN, "channel": channel_id, "text": message},
