@@ -2,6 +2,7 @@ import hashlib
 import hmac
 
 from starlette.applications import Starlette
+from starlette.background import BackgroundTask
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
@@ -27,12 +28,10 @@ async def slack_handler(request: Request):
 
     data = await request.json()
     if "challenge" in data:
-        return PlainTextResponse(data["challenge"], 200)
+        return PlainTextResponse(data["challenge"])
 
-    slack_event = data["event"]
-    event_type_mapping[slack_event["type"]](slack_event)
-
-    return PlainTextResponse("OK", 200)
+    task = BackgroundTask(process_event, event=data["event"], event_id=data["event_id"])
+    return PlainTextResponse("OK", background=task)
 
 
 async def verify_signature(request: Request):
@@ -51,3 +50,7 @@ async def verify_signature(request: Request):
         + hmac.new(str.encode(registry.SIGNING_SECRET), req, hashlib.sha256).hexdigest()
     )
     return hmac.compare_digest(request_hash, signature)
+
+
+async def process_event(event: dict, event_id: str):
+    event_type_mapping[event["type"]](event)
