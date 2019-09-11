@@ -34,6 +34,7 @@ async def send_image(
 ) -> None:
     data = {
         "channel": channel_id,
+        "token": registry.SLACK_TOKEN,
         "blocks": [{"type": "image", "image_url": image_url}],
     }
     if title:
