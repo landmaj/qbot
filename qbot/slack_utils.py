@@ -1,8 +1,6 @@
 from functools import wraps
 from urllib.parse import urljoin
 
-import requests
-
 from qbot.registry import registry
 
 SLACK_URL = "https://slack.com/api/"
@@ -13,10 +11,11 @@ event_type_mapping = {}
 
 
 def send_slack_message(message: str, channel_id: str) -> None:
-    requests.post(
+    async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
         data={"token": registry.SLACK_TOKEN, "channel": channel_id, "text": message},
-    )
+    ) as resp:
+        pass
 
 
 def event_handler(event_type: str):

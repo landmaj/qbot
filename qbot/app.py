@@ -22,6 +22,16 @@ def load_plugins():
     import qbot.plugins  # noqa
 
 
+@app.on_event("startup")
+def setup_registry():
+    await registry.setup()
+
+
+@app.on_event("shutdown")
+async def teardown_registry():
+    await registry.teardown()
+
+
 @app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
     try:
