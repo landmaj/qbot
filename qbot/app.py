@@ -6,8 +6,7 @@ from starlette.background import BackgroundTask
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
-from qbot.slack_commands import *  # noqa
-from qbot.slack_handlers import *  # noqa
+from qbot.registry import registry
 from qbot.slack_utils import event_type_mapping
 
 app = Starlette()
@@ -16,6 +15,11 @@ app = Starlette()
 @app.route("/")
 async def index(request: Request):
     return PlainTextResponse(f"Qbot::{registry.REVISION}")
+
+
+@app.on_event("startup")
+def load_plugins():
+    import qbot.plugins  # noqa
 
 
 @app.route("/slack", methods=["POST"])
