@@ -15,9 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 async def send_message(message: str, channel_id: str) -> None:
-    data = {"token": registry.SLACK_TOKEN, "channel": channel_id, "text": message}
+    data = {"channel": channel_id, "text": message}
     async with registry.http_session.post(
-        url=urljoin(SLACK_URL, "chat.postMessage"), data=data
+        url=urljoin(SLACK_URL, "chat.postMessage"),
+        json=data,
+        headers={"Authorization": f"Bearer {registry.SLACK_TOKEN}"},
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
@@ -31,11 +33,12 @@ async def send_message(message: str, channel_id: str) -> None:
 async def send_image(image_url: str, alt_text: str, channel_id: str) -> None:
     data = {
         "channel": channel_id,
-        "token": registry.SLACK_TOKEN,
         "blocks": [{"type": "image", "image_url": image_url, "alt_text": alt_text}],
     }
     async with registry.http_session.post(
-        url=urljoin(SLACK_URL, "chat.postMessage"), data=data
+        url=urljoin(SLACK_URL, "chat.postMessage"),
+        json=data,
+        headers={"Authorization": f"Bearer {registry.SLACK_TOKEN}"},
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
