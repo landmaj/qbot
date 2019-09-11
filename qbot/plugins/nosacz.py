@@ -28,6 +28,7 @@ async def nosacz(text: str, channel_id: str, **kwargs):
             soup.find("div", {"class": "image-box"})
             .find("h2")
             .get_text()
+            .strip()
             .split("\n")[0]
         )
     except Exception:
