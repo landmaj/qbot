@@ -22,6 +22,11 @@ async def send_message(message: str, channel_id: str) -> None:
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+            return
+        body = await resp.json()
+        if not body["ok"]:
+            error = body["error"]
+            logger.error(f"Slack returned an error: {error}.")
 
 
 async def send_image(
@@ -38,6 +43,11 @@ async def send_image(
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+            return
+        body = await resp.json()
+        if not body["ok"]:
+            error = body["error"]
+            logger.error(f"Slack returned an error: {error}.")
 
 
 def event_handler(event_type: str):
