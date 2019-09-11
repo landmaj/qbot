@@ -57,4 +57,4 @@ async def verify_signature(request: Request):
 
 
 async def process_event(event: dict, event_id: str):
-    event_type_mapping[event["type"]](event)
+    await event_type_mapping[event["type"]](event)
