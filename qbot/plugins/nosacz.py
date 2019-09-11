@@ -10,14 +10,21 @@ logger = logging.getLogger(__name__)
 
 @slack_keyword("nosacz", "losowe memiszcze")
 async def nosacz(text: str, channel_id: str, **kwargs):
-    async with registry.http_session.get("http://www.janusznosacz.pl/losuj") as resp:
-        if not 200 <= resp.status < 400:
-            logging.error(
-                f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
-            )
-            await send_message("Oops, bot spadł z rowerka...", channel_id)
-            return
-        body = await resp.text()
+    while True:
+        async with registry.http_session.get(
+            "http://www.janusznosacz.pl/losuj"
+        ) as resp:
+            if not 200 <= resp.status < 400:
+                logging.error(
+                    f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
+                )
+                await send_message("Oops, bot spadł z rowerka...", channel_id)
+                return
+            # random image sometimes returns an error and redirects to the home page
+            if resp.url.path == "/":
+                continue
+            body = await resp.text()
+            break
 
     soup = BeautifulSoup(body, "html.parser")
     try:
