@@ -1,4 +1,4 @@
-from qbot.slack_utils import event_handler, keyword_to_handler, send_slack_message
+from qbot.slack_utils import event_handler, keyword_to_handler
 
 
 @event_handler("message")
@@ -13,7 +13,3 @@ async def message_handler(event: dict):
                     text, channel_id=channel_id, user=event["user"]
                 )
                 break
-        else:
-            await send_slack_message(
-                "Chcesz użyć tego polecenia, to je zaimplementuj!", channel_id
-            )
