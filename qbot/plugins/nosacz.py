@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from bs4 import BeautifulSoup
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 @slack_keyword("nosacz", "losowe memiszcze")
-async def nosacz(text: str, channel_id: str, **kwargs):
+async def nosacz(text: str, channel_id: str, parent_id: Optional[str], **kwargs):
     while True:
         async with registry.http_session.get(
             "http://www.janusznosacz.pl/losuj"
@@ -42,4 +43,4 @@ async def nosacz(text: str, channel_id: str, **kwargs):
         logger.exception("Could not extract image source from the page.")
         await send_message("Źródełko wyschło. :(", channel_id)
         return
-    await send_image(image_url, alt_text, channel_id)
+    await send_image(image_url, alt_text, channel_id, parent_id)

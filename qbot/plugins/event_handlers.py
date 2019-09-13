@@ -7,9 +7,9 @@ async def message_handler(event: dict):
     if text and text.startswith("!") and "bot_id" not in event:
         text = text[1:]
         channel_id = event["channel"]
+        parent_id = event.get("thread_ts")
+        user = event["user"]
         for key in sorted(keyword_to_handler.keys(), key=len, reverse=True):
             if text.startswith(key):
-                await keyword_to_handler[key](
-                    text, channel_id=channel_id, user=event["user"]
-                )
+                await keyword_to_handler[key](text, channel_id, parent_id, user=user)
                 break
