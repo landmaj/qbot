@@ -11,7 +11,7 @@ class Registry:
     async def setup(self, starlette: Starlette = None):
         self.set_config_vars()
         if self.SENTRY_DSN:
-            sentry_sdk.init(dsn=str(self.SENTRY_DSN))
+            sentry_sdk.init(dsn=str(self.SENTRY_DSN), release=self.REVISION)
         if self.SENTRY_DSN and starlette:
             SentryAsgiMiddleware(starlette)
         self.http_session = aiohttp.ClientSession()
