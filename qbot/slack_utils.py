@@ -24,7 +24,7 @@ async def send_message(
     async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
         json=data,
-        headers={"Authorization": f"Bearer {registry.SLACK_TOKEN}"},
+        headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
@@ -47,7 +47,7 @@ async def send_image(
     async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
         json=data,
-        headers={"Authorization": f"Bearer {registry.SLACK_TOKEN}"},
+        headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
