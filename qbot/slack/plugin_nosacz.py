@@ -1,16 +1,16 @@
 import logging
-from typing import Optional
 
 from bs4 import BeautifulSoup
 
 from qbot.registry import registry
-from qbot.slack_utils import send_image, send_message, slack_keyword
+from qbot.slack.command import add_command
+from qbot.slack.message import Image, IncomingMessage, send_reply
 
 logger = logging.getLogger(__name__)
 
 
-@slack_keyword("nosacz", "losowe memiszcze")
-async def nosacz(text: str, channel_id: str, parent_id: Optional[str], **kwargs):
+@add_command("janusz", "losowe memiszcze", group="nosacze")
+async def janusz(message: IncomingMessage):
     while True:
         async with registry.http_session.get(
             "http://www.janusznosacz.pl/losuj"
@@ -19,7 +19,7 @@ async def nosacz(text: str, channel_id: str, parent_id: Optional[str], **kwargs)
                 logging.error(
                     f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
                 )
-                await send_message("Oops, bot spadł z rowerka...", channel_id)
+                await send_reply(message, "Oops, bot spadł z rowerka...")
                 return
             # random image sometimes returns an error and redirects to the home page
             if resp.url.path == "/":
@@ -41,6 +41,6 @@ async def nosacz(text: str, channel_id: str, parent_id: Optional[str], **kwargs)
         )
     except Exception:
         logger.exception("Could not extract image source from the page.")
-        await send_message("Źródełko wyschło. :(", channel_id)
+        await send_reply(message, "Źródełko wyschło. :(")
         return
-    await send_image(image_url, alt_text, channel_id, parent_id)
+    await send_reply(message, blocks=[Image(image_url, alt_text)])

@@ -1,6 +1,3 @@
-import hashlib
-import hmac
-
 from sentry_sdk import capture_exception
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
@@ -8,7 +5,8 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
 from qbot.registry import registry
-from qbot.slack_utils import event_type_mapping
+from qbot.slack.event import process_slack_event
+from qbot.slack.utils import verify_signature
 
 app = Starlette()
 
@@ -20,7 +18,7 @@ async def index(request: Request):
 
 @app.on_event("startup")
 def load_plugins():
-    import qbot.plugins  # noqa
+    pass
 
 
 @app.on_event("startup")
@@ -46,29 +44,7 @@ async def slack_handler(request: Request):
     if "challenge" in data:
         return PlainTextResponse(data["challenge"])
 
-    task = BackgroundTask(process_event, event=data["event"], event_id=data["event_id"])
-    return PlainTextResponse("OK", background=task)
-
-
-async def verify_signature(request: Request):
-    """
-    Verify the signature of the request sent from Slack with a signature
-    calculated from the app's signing secret and request data.
-    """
-
-    timestamp = request.headers["X-Slack-Request-Timestamp"]
-    signature = request.headers["X-Slack-Signature"]
-    body = await request.body()
-
-    req = str.encode("v0:" + str(timestamp) + ":") + body
-    request_hash = (
-        "v0="
-        + hmac.new(
-            str.encode(str(registry.SIGNING_SECRET)), req, hashlib.sha256
-        ).hexdigest()
+    task = BackgroundTask(
+        process_slack_event, event=data["event"], event_id=data["event_id"]
     )
-    return hmac.compare_digest(request_hash, signature)
-
-
-async def process_event(event: dict, event_id: str):
-    await event_type_mapping[event["type"]](event)
+    return PlainTextResponse("OK", background=task)
