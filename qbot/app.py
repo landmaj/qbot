@@ -13,7 +13,12 @@ app = Starlette()
 
 @app.route("/")
 async def index(request: Request):
-    return PlainTextResponse(f"Qbot::{registry.REVISION}")
+    return PlainTextResponse(f"Qbot::{registry.REVISION:.8}")
+
+
+@app.route("/ping")
+async def ping(request: Request):
+    return PlainTextResponse("pong")
 
 
 @app.on_event("startup")
