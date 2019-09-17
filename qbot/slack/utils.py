@@ -15,12 +15,14 @@ async def verify_signature(request: Request):
     timestamp = request.headers["X-Slack-Request-Timestamp"]
     signature = request.headers["X-Slack-Signature"]
     body = await request.body()
+    return hmac.compare_digest(calculate_signature(timestamp, body), signature)
 
+
+def calculate_signature(timestamp, body):
     req = str.encode("v0:" + str(timestamp) + ":") + body
-    request_hash = (
+    return (
         "v0="
         + hmac.new(
             str.encode(str(registry.SIGNING_SECRET)), req, hashlib.sha256
         ).hexdigest()
     )
-    return hmac.compare_digest(request_hash, signature)
