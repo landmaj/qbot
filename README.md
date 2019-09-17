@@ -1,5 +1,6 @@
 Qbot
 ----
+[![Actions Status](https://github.com/landmaj/qbot/workflows/tests/badge.svg)](https://github.com/landmaj/qbot/actions)
 
 ### Installation
 For an easy deployment, use Dokku. [Let's Encrypt](https://github.com/dokku/dokku-letsencrypt)
