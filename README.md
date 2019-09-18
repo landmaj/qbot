@@ -26,6 +26,7 @@ variable available to the Qbot app.
 ```
 export POSTGRES_IMAGE_VERSION="11.4"
 dokku postgres:create qbot_db
+dokku config:set qbot POSTGRES_DATABASE_SCHEME=postgresql
 dokku postgres:link qbot_db qbot
 ```
 
