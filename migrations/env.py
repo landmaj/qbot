@@ -14,6 +14,8 @@ registry.set_config_vars()
 config = context.config
 config.set_main_option("sqlalchemy.url", str(registry.DATABASE_URL))
 
+render_as_batch = config.get_main_option("sqlalchemy.url").startswith("sqlite:")
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
@@ -49,6 +51,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=render_as_batch,
     )
 
     with context.begin_transaction():
@@ -69,7 +72,11 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            render_as_batch=render_as_batch,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

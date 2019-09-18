@@ -1,12 +1,51 @@
 import logging
 
+import validators
 from bs4 import BeautifulSoup
+from sqlalchemy import func
 
 from qbot.core import registry
+from qbot.db import nosacze
 from qbot.slack.command import add_command
 from qbot.slack.message import Image, IncomingMessage, send_reply
 
 logger = logging.getLogger(__name__)
+
+
+@add_command("nosacz", "halynka dawaj mnie tu te memy", group="nosacze")
+async def nosacz(message: IncomingMessage):
+    image_url = await registry.database.fetch_val(
+        query=nosacze.select().order_by(func.random()), column="url"
+    )
+    if image_url is None:
+        await send_reply(message, text="Nie ma żadnych nosaczy :(")
+        return
+    await send_reply(message, blocks=[Image(image_url, "nosacz")])
+
+
+@add_command("nosacz dodaj", "mało ci memów?", group="nosacze")
+async def nosacz_dodaj(message: IncomingMessage):
+    validated, rejected = [], []
+    for line in message.text.split("\n"):
+        # for some reason Slack adds triangular brackets to URLs
+        line = line.strip("<> ")
+        if validators.url(line):
+            validated.append(line)
+        else:
+            rejected.append(line)
+    if len(validated) == 0:
+        await send_reply(message, text="Nie podałeś żadnych poprawnych URL-i.")
+        return
+    query = f"INSERT INTO {nosacze.fullname}(url) VALUES (:url) ON CONFLICT DO NOTHING"
+    values = [{"url": x} for x in validated]
+    await registry.database.execute_many(query, values)
+    await send_reply(message, text=f"Nowe nosacze: {len(validated)}.")
+    if len(rejected) != 0:
+        text = "\n".join(rejected)
+        await send_reply(
+            message,
+            text=f"*Poniższe wartości są niepoprawne i nie zostały dodane:*\n{text}",
+        )
 
 
 @add_command("janusz", "losowe memiszcze", group="nosacze")
