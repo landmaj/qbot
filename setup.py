@@ -11,5 +11,13 @@ setup(
     author="Michał Wieluński",
     author_email="michal@w-ski.dev",
     install_requires=requirements,
-    extras_require={"dev": ["asynctest==0.13.0", "pytest==5.1.2", "requests==2.22.0"]},
+    extras_require={
+        "dev": [
+            "aiosqlite==0.10.0",
+            "asynctest==0.13.0",
+            "pytest==5.1.2",
+            "pytest-asyncio==0.10.0",
+            "requests==2.22.0",
+        ]
+    },
 )

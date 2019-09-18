@@ -4,7 +4,7 @@ from starlette.background import BackgroundTask
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
-from qbot.registry import registry
+from qbot.core import registry
 from qbot.slack.event import process_slack_event
 from qbot.slack.utils import verify_signature
 

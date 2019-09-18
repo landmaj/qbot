@@ -2,7 +2,7 @@ import logging
 
 from bs4 import BeautifulSoup
 
-from qbot.registry import registry
+from qbot.core import registry
 from qbot.slack.command import add_command
 from qbot.slack.message import Image, IncomingMessage, send_reply
 

@@ -3,7 +3,7 @@ import hmac
 
 from starlette.requests import Request
 
-from qbot.registry import registry
+from qbot.core import registry
 
 
 async def verify_signature(request: Request):

@@ -2,7 +2,7 @@ from collections import defaultdict
 from functools import wraps
 from typing import Optional
 
-from qbot.registry import registry
+from qbot.core import registry
 from qbot.slack.message import IncomingMessage, send_reply
 
 COMMANDS = {}

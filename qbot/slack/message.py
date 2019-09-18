@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from urllib.parse import urljoin
 
-from qbot.registry import registry
+from qbot.core import registry
 
 SLACK_URL = "https://slack.com/api/"
 logger = logging.getLogger(__name__)
