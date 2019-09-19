@@ -1,6 +1,6 @@
 Qbot
 ----
-<img src="https://github.com/landmaj/qbot/workflows/build/badge.svg" width="200" alt="Build Status">
+[<img src="https://github.com/landmaj/qbot/workflows/build/badge.svg" width="200" alt="Build Status">](https://github.com/landmaj/qbot/actions)
 
 ### Installation
 For an easy deployment, use Dokku. [Let's Encrypt](https://github.com/dokku/dokku-letsencrypt)
