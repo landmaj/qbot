@@ -13,7 +13,6 @@ setup(
     install_requires=requirements,
     extras_require={
         "dev": [
-            "aiosqlite==0.10.0",
             "asynctest==0.13.0",
             "pytest==5.1.2",
             "pytest-asyncio==0.10.0",

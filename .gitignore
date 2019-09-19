@@ -52,7 +52,3 @@ venv.bak/
 # IDE
 .idea
 .vscode
-
-# development/testing
-dev.db
-test.db

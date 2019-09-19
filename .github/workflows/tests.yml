@@ -4,6 +4,16 @@ on: [push]
 
 jobs:
   pytest:
+    services:
+      postgres:
+        image: postgres:11
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: qbot_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     runs-on: ubuntu-18.04
     strategy:
       max-parallel: 4
@@ -15,8 +25,11 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
+        sudo apt install libpq-dev  # required by psycopg2
         python -m pip install --upgrade pip
         pip install .[dev]
     - name: Test with pytest
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qbot_test
       run: |
         pytest
