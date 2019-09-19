@@ -49,8 +49,7 @@ async def help_command(message: IncomingMessage) -> None:
 async def top_command(message: IncomingMessage):
     uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
     text = (
-        f"*Qbot*\n"
-        f"*Revision:* {registry.REVISION:.8}*\n"
+        f"*Revision:* {registry.REVISION:.8}\n"
         f"*Uptime:* {uptime}\n"
         f"*Repository:* https://github.com/landmaj/qbot\n"
         f"*Available commands*: {len(COMMANDS)}"
