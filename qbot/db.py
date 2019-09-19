@@ -16,3 +16,10 @@ nosacze = sqlalchemy.Table(
     Column("id", Integer, primary_key=True),
     Column("url", Text, nullable=False, unique=True),
 )
+
+fortunki = sqlalchemy.Table(
+    "fortunki",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("text", Text, nullable=False, unique=True),
+)
