@@ -1,15 +1,14 @@
-import json
-import time
 from unittest.mock import patch
 
 import pytest
 from asynctest import CoroutineMock
 
-from qbot.slack.utils import calculate_signature
+from tests.utils import send_slack_request
 
 
 @pytest.mark.parametrize("message_text", ["!ping", "!help", "!uptime", "!top"])
-def test_command(client, message_text):
+@pytest.mark.asyncio
+async def test_command(client, message_text):
     event = {
         "token": "z26uFbvR1xHJEdHE1OQiO6t8",
         "team_id": "T061EG9RZ",
@@ -26,18 +25,8 @@ def test_command(client, message_text):
         "event_id": "Ev9UQ52YNA",
         "event_time": 1234567890,
     }
-    timestamp = time.time()
-    data = json.dumps(event).encode("utf-8")
-    signature = calculate_signature(timestamp, data)
     with patch("qbot.slack.message.send_message", new=CoroutineMock()) as mock:
-        response = client.post(
-            "/slack",
-            headers={
-                "X-Slack-Request-Timestamp": str(timestamp),
-                "X-Slack-Signature": signature,
-            },
-            data=data,
-        )
+        response = await send_slack_request(event, client)
         mock.assert_called_once()
     assert response.status_code == 200
     assert response.text == "OK"

@@ -1,7 +1,7 @@
 import pytest
+from async_asgi_testclient import TestClient
 from sqlalchemy import create_engine
 from starlette.config import environ
-from starlette.testclient import TestClient
 
 from qbot.app import app
 from qbot.core import registry
@@ -21,12 +21,6 @@ def create_tables(configuration):
 
 
 @pytest.fixture(autouse=True)
-async def setup_registry():
-    await registry.setup()
-    yield registry
-    await registry.teardown()
-
-
-@pytest.fixture()
-def client():
-    return TestClient(app)
+async def client():
+    async with TestClient(app) as clnt:
+        yield clnt

@@ -14,8 +14,10 @@ setup(
     extras_require={
         "dev": [
             "asynctest==0.13.0",
+            "async-asgi-testclient==1.0.3",
             "pytest==5.1.2",
             "pytest-asyncio==0.10.0",
+            "pytest-randomly==3.1.0",
             "requests==2.22.0",
         ]
     },
