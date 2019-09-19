@@ -32,12 +32,13 @@ async def ping(message: IncomingMessage) -> None:
     await send_reply(message, text="Pong!")
 
 
-@add_command("help", "pokaż tę wiadomość")
+@add_command("help", "show this message and exit")
 async def help_message(message: IncomingMessage) -> None:
+    uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
     header = (
         f"*Qbot rev. {registry.REVISION:.8}*\n"
         "*Repository:* https://github.com/landmaj/qbot\n"
-        f"*Uptime:* {registry.uptime}"
+        f"*Uptime:* {uptime}"
     )
     body = ""
     for group, commands in DESCRIPTIONS.items():
@@ -48,3 +49,24 @@ async def help_message(message: IncomingMessage) -> None:
         )
         body = "\n".join([body, group_name, group_body])
     await send_reply(message, text=f"{header}\n{body}")
+
+
+@add_command("uptime", "time since last restart")
+async def uptime_command(message: IncomingMessage) -> None:
+    if registry.uptime is None:
+        await send_reply(message, text="N/A")
+        return
+    total_seconds = int(registry.uptime.total_seconds())
+    days = total_seconds // 86_400
+    hours = total_seconds % 86_400 // 3600
+    minutes = total_seconds % 3600 // 60
+    seconds = total_seconds % 60
+    if days:
+        text = f"*Uptime:* {days} days {hours} hours {minutes} minutes and {seconds} seconds"
+    elif hours:
+        text = f"*Uptime:* {hours} hours {minutes} minutes and {seconds} seconds"
+    elif minutes:
+        text = f"*Uptime:* {minutes} minutes and {seconds} seconds"
+    else:
+        text = f"*Uptime:* {seconds} seconds"
+    await send_reply(message, text=text)

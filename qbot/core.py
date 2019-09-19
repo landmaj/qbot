@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Optional
 
 import aiohttp
 import databases
@@ -44,11 +45,10 @@ class Registry:
         await self.database.disconnect()
 
     @property
-    def uptime(self) -> str:
+    def uptime(self) -> Optional[timedelta]:
         if self.DEPLOY_TIMESTAMP is None:
-            return "N/A"
-        uptime = datetime.utcnow() - datetime.utcfromtimestamp(self.DEPLOY_TIMESTAMP)
-        return str(uptime).split(".")[0]
+            return
+        return datetime.utcnow() - datetime.utcfromtimestamp(self.DEPLOY_TIMESTAMP)
 
 
 registry = Registry()
