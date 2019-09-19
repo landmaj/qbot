@@ -6,7 +6,7 @@ from qbot.slack.command import add_command
 from qbot.slack.message import IncomingMessage, send_reply
 
 
-@add_command("fortunka", "USAGE: `!fortunka [-- ID]`", group="fortunki")
+@add_command("fortunka", "`!fortunka [-- ID]`", group="fortunki")
 async def fortunka_cmd(message: IncomingMessage):
     if message.text:
         try:
@@ -28,7 +28,7 @@ async def fortunka_cmd(message: IncomingMessage):
     await send_reply(message, text=fortunka)
 
 
-@add_command("fortunka dodaj", "USAGE: `!fortunka dodaj -- [TEXT]", group="fortunki")
+@add_command("fortunka dodaj", "`!fortunka dodaj -- TEXT`", group="fortunki")
 async def fortunka_dodaj(message: IncomingMessage):
     if not message.text:
         await send_reply(message, text="Pustych fortunek nie dodaję!")
