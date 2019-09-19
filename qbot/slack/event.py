@@ -1,7 +1,7 @@
 from functools import wraps
 
 from qbot.slack.command import COMMANDS
-from qbot.slack.message import IncomingMessage
+from qbot.slack.message import IncomingMessage, send_reply
 
 EVENTS = {}
 
@@ -45,3 +45,5 @@ async def message_handler(event: dict):
 
         if command in COMMANDS:
             await COMMANDS[command](message)
+        else:
+            await send_reply(message, text=f"Nieznane polecenie: {command}")
