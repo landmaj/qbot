@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import aiohttp
 import databases
 import sentry_sdk
@@ -17,6 +19,7 @@ class Registry:
         self.DATABASE_URL = config("DATABASE_URL", cast=Secret)
         self.SENTRY_DSN = config("Q_SENTRY_DSN", cast=Secret, default=None)
         self.TESTING = config("TESTING", cast=bool, default=False)
+        self.DEPLOY_TIMESTAMP = config("DEPLOY_TIMESTAMP", cast=int, default=None)
 
     async def setup(self, starlette: Starlette = None):
         self.set_config_vars()
@@ -39,6 +42,13 @@ class Registry:
     async def teardown(self):
         await self.http_session.close()
         await self.database.disconnect()
+
+    @property
+    def uptime(self) -> str:
+        if self.DEPLOY_TIMESTAMP is None:
+            return "N/A"
+        uptime = datetime.utcnow() - datetime.utcfromtimestamp(self.DEPLOY_TIMESTAMP)
+        return str(uptime).split(".")[0]
 
 
 registry = Registry()

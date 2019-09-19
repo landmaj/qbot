@@ -36,7 +36,8 @@ async def ping(message: IncomingMessage) -> None:
 async def help_message(message: IncomingMessage) -> None:
     header = (
         f"*Qbot rev. {registry.REVISION:.8}*\n"
-        "*Repository:* https://github.com/landmaj/qbot"
+        "*Repository:* https://github.com/landmaj/qbot\n"
+        f"*Uptime:* {registry.uptime}"
     )
     body = ""
     for group, commands in DESCRIPTIONS.items():
@@ -46,4 +47,4 @@ async def help_message(message: IncomingMessage) -> None:
             [f"*!{key}*: {value}" for key, value in commands.items()]
         )
         body = "\n".join([body, group_name, group_body])
-    await send_reply(message, text=f"{header}\n\n{body}")
+    await send_reply(message, text=f"{header}\n{body}")
