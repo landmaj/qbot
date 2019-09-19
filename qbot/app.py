@@ -22,11 +22,6 @@ async def ping(request: Request):
 
 
 @app.on_event("startup")
-def load_plugins():
-    pass
-
-
-@app.on_event("startup")
 async def setup_registry():
     await registry.setup()
 

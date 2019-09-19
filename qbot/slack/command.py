@@ -28,27 +28,34 @@ def add_command(keyword: str, description: str, group: Optional["str"] = None):
 
 
 @add_command("ping", "dig it!")
-async def ping(message: IncomingMessage) -> None:
+async def ping_command(message: IncomingMessage) -> None:
     await send_reply(message, text="Pong!")
 
 
 @add_command("help", "show this message and exit")
-async def help_message(message: IncomingMessage) -> None:
-    uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
-    header = (
-        f"*Qbot rev. {registry.REVISION:.8}*\n"
-        "*Repository:* https://github.com/landmaj/qbot\n"
-        f"*Uptime:* {uptime}"
-    )
-    body = ""
+async def help_command(message: IncomingMessage) -> None:
+    text = ""
     for group, commands in DESCRIPTIONS.items():
         group = "MISCELLANEOUS" if group is None else group
-        group_name = f"\n*{group.upper()}*"
+        group_name = f"*{group.upper()}*"
         group_body = "\n".join(
             [f"*!{key}*: {value}" for key, value in commands.items()]
         )
-        body = "\n".join([body, group_name, group_body])
-    await send_reply(message, text=f"{header}\n{body}")
+        text = "\n\n".join([text, "\n".join([group_name, group_body])])
+    await send_reply(message, text=text)
+
+
+@add_command("top", "information about the bot")
+async def top_command(message: IncomingMessage):
+    uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
+    text = (
+        f"*Qbot*\n"
+        f"*Revision:* {registry.REVISION:.8}*\n"
+        f"*Uptime:* {uptime}\n"
+        f"*Repository:* https://github.com/landmaj/qbot\n"
+        f"*Available commands*: {len(COMMANDS)}"
+    )
+    await send_reply(message, text=text)
 
 
 @add_command("uptime", "time since last restart")

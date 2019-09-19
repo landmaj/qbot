@@ -15,7 +15,7 @@ dokku letsencrypt qbot
 
 Configuration is stored in environmental variables. They can be tricky in Dokku, so check
 [the documentation](http://dokku.viewdocs.io/dokku/configuration/environment-variables/).
-All the required variables are listed in [`example.env`](example.env) file.
+All the required variables are listed in [`.env`](.env) file.
 
 ```
 dokku config:set qbot VARIABLE=VALUE

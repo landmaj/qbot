@@ -10,8 +10,6 @@ from qbot.db import metadata
 
 @pytest.fixture(autouse=True, scope="session")
 def configuration():
-    environ["Q_SIGNING_SECRET"] = "SIGNING_SECRET"
-    environ["Q_SLACK_TOKEN"] = "SLACK_TOKEN"
     environ["TESTING"] = "True"
     registry.set_config_vars()
 
@@ -22,8 +20,13 @@ def create_tables(configuration):
     metadata.create_all(engine)
 
 
+@pytest.fixture(autouse=True)
+async def setup_registry():
+    await registry.setup()
+    yield registry
+    await registry.teardown()
+
+
 @pytest.fixture()
 def client():
-    # Context Manager is required to execute event handlers
-    with TestClient(app) as clnt:
-        yield clnt
+    return TestClient(app)
