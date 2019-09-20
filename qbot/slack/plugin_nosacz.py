@@ -61,7 +61,10 @@ async def nosacz(message: IncomingMessage):
 
 
 @add_command(
-    "nosacz dodaj", "`!nosacz dodaj -- https://example.com/image.jpg`", group="nosacze"
+    "nosacz dodaj",
+    "`!nosacz dodaj -- https://example.com/image.jpg`",
+    group="nosacze",
+    safe_to_fix=False,
 )
 async def nosacz_dodaj(message: IncomingMessage):
     validated, rejected = [], []

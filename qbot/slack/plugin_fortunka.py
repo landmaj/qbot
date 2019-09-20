@@ -28,7 +28,9 @@ async def fortunka_cmd(message: IncomingMessage):
     await send_reply(message, text=fortunka)
 
 
-@add_command("fortunka dodaj", "`!fortunka dodaj -- TEXT`", group="fortunki")
+@add_command(
+    "fortunka dodaj", "`!fortunka dodaj -- TEXT`", group="fortunki", safe_to_fix=False
+)
 async def fortunka_dodaj(message: IncomingMessage):
     if not message.text:
         await send_reply(message, text="Pustych fortunek nie dodaję!")
