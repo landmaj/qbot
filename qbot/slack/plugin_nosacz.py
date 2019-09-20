@@ -2,12 +2,12 @@ import logging
 
 import validators
 from bs4 import BeautifulSoup
-from sqlalchemy import func
 
 from qbot.core import registry
 from qbot.db import nosacze
 from qbot.slack.command import add_command
 from qbot.slack.message import Image, IncomingMessage, send_reply
+from qbot.utils import add_recently_seen, get_recently_seen
 
 logger = logging.getLogger(__name__)
 
@@ -51,13 +51,23 @@ async def janusz(message: IncomingMessage):
 
 @add_command("nosacz", "halynka dawaj mnie tu te memy", group="nosacze")
 async def nosacz(message: IncomingMessage):
-    image_url = await registry.database.fetch_val(
-        query=nosacze.select().order_by(func.random()), column="url"
-    )
-    if image_url is None:
-        await send_reply(message, text="Nie ma żadnych nosaczy :(")
+    recently_seen = await get_recently_seen(nosacze)
+    if len(recently_seen) == 0:
+        query = f"SELECT (id, url) FROM {nosacze.fullname} ORDER BY random() LIMIT 1"
+        result = await registry.database.execute(query)
+    else:
+        recently_seen = ", ".join([str(x) for x in recently_seen])
+        query = (
+            f"SELECT (id, url) FROM {nosacze.fullname} WHERE id NOT IN ({recently_seen}) "
+            f"ORDER BY random() LIMIT 1"
+        )
+        result = await registry.database.execute(query)
+    if result is None:
+        await send_reply(message, text="Nosacze wyginęły :(")
         return
+    identifier, image_url = result
     await send_reply(message, blocks=[Image(image_url, "nosacz")])
+    await add_recently_seen(nosacze, identifier)
 
 
 @add_command(
