@@ -4,6 +4,7 @@ from qbot.core import registry
 from qbot.db import fortunki
 from qbot.slack.command import add_command
 from qbot.slack.message import IncomingMessage, send_reply
+from qbot.utils import add_recently_seen, get_recently_seen
 
 
 @add_command("fortunka", "`!fortunka [-- ID]`", group="fortunki")
@@ -20,12 +21,26 @@ async def fortunka_cmd(message: IncomingMessage):
             await send_reply(message, text=f"Nie ma fortunki o ID {identifier}.")
             return
     else:
-        query = f"SELECT text FROM {fortunki.fullname} ORDER BY random() LIMIT 1"
-        fortunka = await registry.database.execute(query)
-        if fortunka is None:
+        recently_seen = await get_recently_seen(fortunki)
+        if len(recently_seen) == 0:
+            query = (
+                f"SELECT (id, text) FROM {fortunki.fullname} ORDER BY random() LIMIT 1"
+            )
+            result = await registry.database.execute(query)
+        else:
+            recently_seen = ", ".join([str(x) for x in recently_seen])
+            query = (
+                f"SELECT (id, text) FROM {fortunki.fullname} WHERE id NOT IN ({recently_seen}) "
+                f"ORDER BY random() LIMIT 1"
+            )
+            result = await registry.database.execute(query)
+        if result is None:
             await send_reply(message, text="Nie ma fortunek :(")
             return
+        else:
+            identifier, fortunka = result
     await send_reply(message, text=fortunka)
+    await add_recently_seen(fortunki, identifier)
 
 
 @add_command(
