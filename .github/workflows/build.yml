@@ -29,16 +29,22 @@ jobs:
         sudo apt install libpq-dev  # required by psycopg2
         python -m pip install --upgrade pip
         pip install .[dev]
-    - name: Run migrations
+    - name: Run alembic migrations
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qbot_test
       run: |
         alembic upgrade head
-    - name: Test with pytest
+    - name: Run pytest
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qbot_test
       run: |
         pytest
+    - name: Revert migrations
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qbot_test
+      run: |
+        alembic downgrade base
+
   lint:
     runs-on: ubuntu-18.04
     steps:
@@ -51,15 +57,21 @@ jobs:
         run: |
           pip install pre-commit
           pre-commit install
-      - name: Run pre-commit
+      - name: Run autoflake
         run: |
-          pre-commit run --all-files
+          pre-commit run autoflake --all-files
+      - name: Run isort
+        run: |
+          pre-commit run isort --all-files
+      - name: Run black
+        run: |
+          pre-commit run black --all-files
   deploy:
     needs: [pytest, lint]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
-      - name: Deploy the application
+      - name: Push to Dokku
         uses: landmaj/github-action-dokku@master
         with:
           PRIVATE_KEY: ${{ secrets.DOKKU_PRIVATE_KEY }}
