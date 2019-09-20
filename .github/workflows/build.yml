@@ -29,6 +29,11 @@ jobs:
         sudo apt install libpq-dev  # required by psycopg2
         python -m pip install --upgrade pip
         pip install .[dev]
+    - name: Run migrations
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qbot_test
+      run: |
+        alembic upgrade head
     - name: Test with pytest
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/qbot_test
