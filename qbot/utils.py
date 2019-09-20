@@ -15,16 +15,19 @@ def import_all_modules(directory: Path):
 
 
 async def get_recently_seen(table: Table) -> Set[int]:
-    cache = getattr(table, "cache", set())
-    if len(cache) >= getattr(table, "cache_max_size", 0):
-        query = f"SELECT count(*) FROM {table.fullname}"
-        table.cache_max_size = await registry.database.execute(query) // 2
+    if not hasattr(table, "cache"):
         table.cache = set()
-    return cache
+    return table.cache
 
 
 async def add_recently_seen(table: Table, value: int) -> None:
-    if hasattr(table, "cache"):
-        table.cache.add(value)
-    else:
+    count = await registry.database.execute(f"SELECT count(*) FROM {table.fullname}")
+    max_cache_size = count - 1
+    if max_cache_size == 0:
+        return
+    if not hasattr(table, "cache"):
+        table.cache = set()
+    if len(table.cache) >= max_cache_size:
         table.cache = {value}
+    else:
+        table.cache.add(value)
