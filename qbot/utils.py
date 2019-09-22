@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Set
 
-from sqlalchemy import Table
+from sqlalchemy import Table, func, select
 
 from qbot.core import registry
 
@@ -21,13 +21,18 @@ async def get_recently_seen(table: Table) -> Set[int]:
 
 
 async def add_recently_seen(table: Table, value: int) -> None:
-    count = await registry.database.execute(f"SELECT count(*) FROM {table.fullname}")
-    max_cache_size = count - 1
-    if max_cache_size == 0:
-        return
-    if not hasattr(table, "cache"):
-        table.cache = set()
-    if len(table.cache) >= max_cache_size:
+    if not hasattr(table, "max_cache_size"):
+        await set_max_cache_size(table)
+    if len(await get_recently_seen(table)) >= table.max_cache_size != 0:
+        await set_max_cache_size(table)
         table.cache = {value}
-    else:
+    elif table.max_cache_size != 0:
         table.cache.add(value)
+
+
+async def set_max_cache_size(table: Table):
+    count = await registry.database.fetch_val(select([func.count()]).select_from(table))
+    if count == 0:
+        table.max_cache_size = 0
+    else:
+        table.max_cache_size = count - 1
