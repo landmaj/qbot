@@ -45,7 +45,10 @@ async def test_fortunka_dodaj(client):
     assert count_before == 0
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        mock.assert_called_once_with(ANY, text=ANY)
+        identifier = await registry.database.execute(
+            f"SELECT (id) FROM {fortunki.fullname}"
+        )
+        mock.assert_called_once_with(ANY, text=f"Fortunka {identifier} dodana!")
     count_after = await registry.database.execute(
         query=f"SELECT COUNT(*) FROM {fortunki.fullname}"
     )

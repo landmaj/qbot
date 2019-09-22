@@ -52,15 +52,11 @@ async def fortunka_dodaj(message: IncomingMessage):
         return
     try:
         async with registry.database.transaction():
-            await registry.database.execute(
-                query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text)",
+            identifier = await registry.database.execute(
+                query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text) RETURNING (id)",
                 values={"text": message.text},
             )
     except UniqueViolationError:
         await send_reply(message, text="Taka fortunka już istnieje.")
         return
-    identifier = await registry.database.execute(
-        query=f"SELECT id from {fortunki.fullname} WHERE text = :text",
-        values={"text": message.text},
-    )
     await send_reply(message, text=f"Fortunka {identifier} dodana!")
