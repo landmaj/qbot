@@ -21,9 +21,7 @@ async def test_add_recently_seen_when_cache_does_not_exist(client):
         "event_id": "Ev9UQ52YNA",
     }
     values = [{"text": "1"}, {"text": "2"}, {"text": "3"}, {"text": "4"}]
-    await registry.database.execute_many(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text)", values=values
-    )
+    await registry.database.execute_many(query=fortunki.insert(), values=values)
     if hasattr(fortunki, "cache"):
         delattr(fortunki, "cache")
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
@@ -48,9 +46,7 @@ async def test_add_recently_seen_when_cache_exists(client):
         "event_id": "Ev9UQ52YNA",
     }
     values = [{"text": "1"}, {"text": "2"}, {"text": "3"}, {"text": "4"}]
-    await registry.database.execute_many(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text)", values=values
-    )
+    await registry.database.execute_many(query=fortunki.insert(), values=values)
     fortunki.cache = set()
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
@@ -73,9 +69,7 @@ async def test_get_recently_seen_single_item(client):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    await registry.database.execute(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES ('1')"
-    )
+    await registry.database.execute(query=fortunki.insert(), values={"text": "1"})
     if hasattr(fortunki, "cache"):
         delattr(fortunki, "cache")
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
@@ -101,9 +95,7 @@ async def test_get_recently_seen_three_items(client):
         "event_id": "Ev9UQ52YNA",
     }
     values = [{"text": "1"}, {"text": "2"}, {"text": "3"}]
-    await registry.database.execute_many(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text)", values=values
-    )
+    await registry.database.execute_many(query=fortunki.insert(), values=values)
     if hasattr(fortunki, "cache"):
         delattr(fortunki, "cache")
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
@@ -153,9 +145,7 @@ async def test_get_recently_seen_cache_size(
     values = []
     for x in range(number_of_inputs):
         values.append({"text": str(x)})
-    await registry.database.execute_many(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text)", values=values
-    )
+    await registry.database.execute_many(query=fortunki.insert(), values=values)
     if hasattr(fortunki, "cache"):
         delattr(fortunki, "cache")
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()):

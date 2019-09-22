@@ -2,6 +2,7 @@ from unittest.mock import ANY, patch
 
 import pytest
 from asynctest import CoroutineMock
+from sqlalchemy import func, select
 
 from qbot.core import registry
 from qbot.db import fortunki
@@ -39,18 +40,18 @@ async def test_fortunka_dodaj(client):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    count_before = await registry.database.execute(
-        query=f"SELECT COUNT(*) FROM {fortunki.fullname}"
+    count_before = await registry.database.fetch_val(
+        select([func.count()]).select_from(fortunki)
     )
     assert count_before == 0
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        identifier = await registry.database.execute(
-            f"SELECT (id) FROM {fortunki.fullname}"
+        identifier = await registry.database.fetch_val(
+            query=fortunki.select(), column="id"
         )
         mock.assert_called_once_with(ANY, text=f"Fortunka {identifier} dodana!")
-    count_after = await registry.database.execute(
-        query=f"SELECT COUNT(*) FROM {fortunki.fullname}"
+    count_after = await registry.database.fetch_val(
+        select([func.count()]).select_from(fortunki)
     )
     assert count_after == 1
     assert response.status_code == 200
@@ -72,8 +73,8 @@ async def test_fortunka_dodaj_empty_message(client):
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once_with(ANY, text="Pustych fortunek nie dodaję!")
-    count_after = await registry.database.execute(
-        query=f"SELECT COUNT(*) FROM {fortunki.fullname}"
+    count_after = await registry.database.fetch_val(
+        select([func.count()]).select_from(fortunki)
     )
     assert count_after == 0
     assert response.status_code == 200
@@ -92,18 +93,16 @@ async def test_fortunka_dodaj_unique_violation(client):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    await registry.database.execute(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES ('qwerty')"
-    )
-    count_before = await registry.database.execute(
-        query=f"SELECT COUNT(*) FROM {fortunki.fullname}"
+    await registry.database.execute(query=fortunki.insert(), values={"text": "qwerty"})
+    count_before = await registry.database.fetch_val(
+        select([func.count()]).select_from(fortunki)
     )
     assert count_before == 1
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once_with(ANY, text="Taka fortunka już istnieje.")
-    count_after = await registry.database.execute(
-        query=f"SELECT COUNT(*) FROM {fortunki.fullname}"
+    count_after = await registry.database.fetch_val(
+        select([func.count()]).select_from(fortunki)
     )
     assert count_after == 1
     assert response.status_code == 200
@@ -122,9 +121,7 @@ async def test_fortunka(client):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    await registry.database.execute(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES ('qwerty')"
-    )
+    await registry.database.execute(query=fortunki.insert(), values={"text": "qwerty"})
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once_with(ANY, text="qwerty")
@@ -145,9 +142,7 @@ async def test_fortunka_id_not_an_integer(client, identifier):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    await registry.database.execute(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES ('qwerty')"
-    )
+    await registry.database.execute(query=fortunki.insert(), values={"text": "qwerty"})
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once_with(ANY, text=f"Niepoprawne ID.")
@@ -167,9 +162,7 @@ async def test_fortunka_id_not_an_integer(client):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    await registry.database.execute(
-        query=f"INSERT INTO {fortunki.fullname}(text) VALUES ('qwerty')"
-    )
+    await registry.database.execute(query=fortunki.insert(), values={"text": "qwerty"})
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once_with(ANY, text=f"Nie ma fortunki o ID 2137.")

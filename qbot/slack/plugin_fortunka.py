@@ -1,4 +1,5 @@
 from asyncpg import UniqueViolationError
+from sqlalchemy import func
 
 from qbot.core import registry
 from qbot.db import fortunki
@@ -15,32 +16,24 @@ async def fortunka_cmd(message: IncomingMessage):
         except ValueError:
             await send_reply(message, text="Niepoprawne ID.")
             return
-        query = f"SELECT text FROM {fortunki.fullname} WHERE id = :id"
-        fortunka = await registry.database.execute(query, {"id": identifier})
-        if fortunka is None:
+        result = await registry.database.fetch_one(
+            fortunki.select().where(fortunki.c.id == identifier)
+        )
+        if result is None:
             await send_reply(message, text=f"Nie ma fortunki o ID {identifier}.")
             return
     else:
         recently_seen = await get_recently_seen(fortunki)
-        if len(recently_seen) == 0:
-            query = (
-                f"SELECT (id, text) FROM {fortunki.fullname} ORDER BY random() LIMIT 1"
-            )
-            result = await registry.database.execute(query)
-        else:
-            recently_seen = ", ".join([str(x) for x in recently_seen])
-            query = (
-                f"SELECT (id, text) FROM {fortunki.fullname} WHERE id NOT IN ({recently_seen}) "
-                f"ORDER BY random() LIMIT 1"
-            )
-            result = await registry.database.execute(query)
+        query = fortunki.select()
+        if len(recently_seen) != 0:
+            query = query.where(fortunki.c.id.notin_(recently_seen))
+        query = query.order_by(func.random()).limit(1)
+        result = await registry.database.fetch_one(query)
         if result is None:
             await send_reply(message, text="Nie ma fortunek :(")
             return
-        else:
-            identifier, fortunka = result
-    await send_reply(message, text=fortunka)
-    await add_recently_seen(fortunki, identifier)
+    await send_reply(message, text=result["text"])
+    await add_recently_seen(fortunki, result["id"])
 
 
 @add_command(
@@ -53,8 +46,7 @@ async def fortunka_dodaj(message: IncomingMessage):
     try:
         async with registry.database.transaction():
             identifier = await registry.database.execute(
-                query=f"INSERT INTO {fortunki.fullname}(text) VALUES (:text) RETURNING (id)",
-                values={"text": message.text},
+                query=fortunki.insert(), values={"text": message.text}
             )
     except UniqueViolationError:
         await send_reply(message, text="Taka fortunka już istnieje.")

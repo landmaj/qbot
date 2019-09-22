@@ -2,6 +2,8 @@ import logging
 
 import validators
 from bs4 import BeautifulSoup
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import insert
 
 from qbot.core import registry
 from qbot.db import nosacze
@@ -52,22 +54,16 @@ async def janusz(message: IncomingMessage):
 @add_command("nosacz", "halynka dawaj mnie tu te memy", group="nosacze")
 async def nosacz(message: IncomingMessage):
     recently_seen = await get_recently_seen(nosacze)
-    if len(recently_seen) == 0:
-        query = f"SELECT (id, url) FROM {nosacze.fullname} ORDER BY random() LIMIT 1"
-        result = await registry.database.execute(query)
-    else:
-        recently_seen = ", ".join([str(x) for x in recently_seen])
-        query = (
-            f"SELECT (id, url) FROM {nosacze.fullname} WHERE id NOT IN ({recently_seen}) "
-            f"ORDER BY random() LIMIT 1"
-        )
-        result = await registry.database.execute(query)
+    query = nosacze.select()
+    if len(recently_seen) != 0:
+        query = query.where(nosacze.c.id.notin_(recently_seen))
+    query = query.order_by(func.random()).limit(1)
+    result = await registry.database.fetch_one(query)
     if result is None:
         await send_reply(message, text="Nosacze wyginęły :(")
         return
-    identifier, image_url = result
-    await send_reply(message, blocks=[Image(image_url, "nosacz")])
-    await add_recently_seen(nosacze, identifier)
+    await send_reply(message, blocks=[Image(result["url"], "nosacz")])
+    await add_recently_seen(nosacze, result["id"])
 
 
 @add_command(
@@ -88,7 +84,7 @@ async def nosacz_dodaj(message: IncomingMessage):
     if len(validated) == 0:
         await send_reply(message, text="Nie podałeś żadnych poprawnych URL-i.")
         return
-    query = f"INSERT INTO {nosacze.fullname}(url) VALUES (:url) ON CONFLICT DO NOTHING"
+    query = insert(nosacze).on_conflict_do_nothing(index_elements=["url"])
     values = [{"url": x} for x in validated]
     await registry.database.execute_many(query, values)
     await send_reply(message, text=f"Nowe nosacze: {len(validated)}.")
