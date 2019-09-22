@@ -31,7 +31,7 @@ async def message_handler(event: dict):
     message = IncomingMessage(
         channel=event["channel"],
         user=event.get("user", "BOT"),
-        text=event["text"],
+        text=event.get("text", ""),
         ts=event["ts"],
         thread_ts=event.get("thread_ts"),
     )
