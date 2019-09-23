@@ -3,9 +3,12 @@ from functools import lru_cache, wraps
 from typing import Optional, Tuple
 
 from fuzzywuzzy import process
+from sqlalchemy import func, select
 
 from qbot.core import registry
+from qbot.db import fortunki, nosacze
 from qbot.slack.message import IncomingMessage, send_reply
+from qbot.utils import get_recently_seen
 
 COMMANDS = {}
 DESCRIPTIONS = defaultdict(lambda: defaultdict())
@@ -73,11 +76,20 @@ async def help_command(message: IncomingMessage) -> None:
 @add_command("top", "information about the bot")
 async def top_command(message: IncomingMessage):
     uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
+    f_cnt = await registry.database.fetch_val(
+        select([func.count()]).select_from(fortunki)
+    )
+    f_rollover = f_cnt - len(await get_recently_seen(fortunki))
+    n_cnt = await registry.database.fetch_val(
+        select([func.count()]).select_from(nosacze)
+    )
+    n_rollover = n_cnt - len(await get_recently_seen(nosacze))
     text = (
         f"*Revision:* {registry.REVISION:.8}\n"
         f"*Uptime:* {uptime}\n"
         f"*Repository:* https://github.com/landmaj/qbot\n"
-        f"*Available commands*: {len(COMMANDS)}"
+        f"*Fortunki:* {f_cnt}; cache reset in approx. {f_rollover}\n"
+        f"*Nosacze:* {n_cnt}; cache reset in approx. {n_rollover}"
     )
     await send_reply(message, text=text)
 
