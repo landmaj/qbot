@@ -31,9 +31,16 @@ async def send_reply(
     text: Optional[str] = None,
     blocks: Optional[List["Block"]] = None,
 ) -> None:
-    message = OutgoingMessage(
-        channel=reply_to.channel, thread_ts=reply_to.thread_ts, text=text, blocks=blocks
-    )
+    if text and blocks:
+        raise Exception("Text and blocks cannot be used at the same time.")
+    elif text:
+        message = OutgoingMessage(
+            channel=reply_to.channel, thread_ts=reply_to.thread_ts, blocks=[Text(text)]
+        )
+    else:
+        message = OutgoingMessage(
+            channel=reply_to.channel, thread_ts=reply_to.thread_ts, blocks=blocks
+        )
     await send_message(message)
 
 
@@ -50,20 +57,16 @@ class IncomingMessage:
 class OutgoingMessage:
     channel: str
     thread_ts: Optional[str]
-    text: Optional[str]
-    blocks: Optional[List["Block"]]
+    blocks: [List["Block"]]
 
     def to_dict(self) -> dict:
         data = {"channel": self.channel}
         # if thread_ts is present, the message will be a reply to a thread
         if self.thread_ts:
             data["thread_ts"] = self.thread_ts
-        if self.text:
-            data["text"] = self.text
-        if self.blocks:
-            data["blocks"] = []
-            for block in self.blocks:
-                data["blocks"].append(block.to_dict())
+        data["blocks"] = []
+        for block in self.blocks:
+            data["blocks"].append(block.to_dict())
         return data
 
 
@@ -71,6 +74,14 @@ class Block(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def to_dict(self) -> dict:
         pass
+
+
+@dataclass()
+class Text(Block):
+    text: str
+
+    def to_dict(self) -> dict:
+        return {"type": "section", "text": {"type": "mrkdwn", "text": self.text}}
 
 
 @dataclass()
