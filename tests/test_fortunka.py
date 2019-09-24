@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 
 from qbot.core import registry
 from qbot.db import fortunki
+from qbot.slack.message import TextWithButton
 from tests.utils import send_slack_request
 
 
@@ -121,10 +122,14 @@ async def test_fortunka(client):
         },
         "event_id": "Ev9UQ52YNA",
     }
-    await registry.database.execute(query=fortunki.insert(), values={"text": "qwerty"})
+    identifier = await registry.database.execute(
+        query=fortunki.insert(), values={"text": "qwerty"}
+    )
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        mock.assert_called_once_with(ANY, text="qwerty")
+        mock.assert_called_once_with(
+            ANY, blocks=[TextWithButton(text="qwerty", button_text=str(identifier))]
+        )
     assert response.status_code == 200
     assert response.text == "OK"
 

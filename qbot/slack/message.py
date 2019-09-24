@@ -80,3 +80,19 @@ class Image(Block):
 
     def to_dict(self) -> dict:
         return {"type": "image", "image_url": self.image_url, "alt_text": self.alt_text}
+
+
+@dataclass()
+class TextWithButton(Block):
+    text: str
+    button_text: str
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": self.text},
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": self.button_text},
+            },
+        }

@@ -5,6 +5,7 @@ from asynctest import CoroutineMock
 
 from qbot.core import registry
 from qbot.db import fortunki
+from qbot.slack.message import TextWithButton
 from tests.utils import send_slack_request
 
 
@@ -28,7 +29,9 @@ async def test_add_recently_seen_when_cache_does_not_exist(client):
         del fortunki.max_cache_size
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        mock.assert_called_once_with(ANY, text=ANY)
+        mock.assert_called_once_with(
+            ANY, blocks=[TextWithButton(text=ANY, button_text=ANY)]
+        )
     assert response.status_code == 200
     assert response.text == "OK"
     assert type(fortunki.cache) == set
@@ -53,7 +56,9 @@ async def test_add_recently_seen_when_cache_exists(client):
     fortunki.max_cache_size = 2
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        mock.assert_called_once_with(ANY, text=ANY)
+    mock.assert_called_once_with(
+        ANY, blocks=[TextWithButton(text=ANY, button_text=ANY)]
+    )
     assert response.status_code == 200
     assert response.text == "OK"
     assert type(fortunki.cache) == set
@@ -80,9 +85,10 @@ async def test_get_recently_seen_single_item(client):
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         await send_slack_request(event, client)
         await send_slack_request(event, client)
-        first = mock.call_args_list[0][1]["text"]
-        second = mock.call_args_list[1][1]["text"]
-        assert first == second != "Nie ma fortunek :("
+
+        first = mock.call_args_list[0][1]["blocks"][0]
+        second = mock.call_args_list[1][1]["blocks"][0]
+        assert first == second
     assert type(fortunki.cache) == set
     assert len(fortunki.cache) == 0
 
@@ -109,10 +115,10 @@ async def test_get_recently_seen_three_items(client):
         for _ in range(10):
             for _ in range(3):
                 await send_slack_request(event, client)
-            first = mock.call_args_list[0][1]["text"]
-            second = mock.call_args_list[1][1]["text"]
-            third = mock.call_args_list[2][1]["text"]
-            assert first != second != third != "Nie ma fortunek :("
+            first = mock.call_args_list[0][1]["blocks"][0]
+            second = mock.call_args_list[1][1]["blocks"][0]
+            third = mock.call_args_list[2][1]["blocks"][0]
+            assert first != second != third
     assert type(fortunki.cache) == set
     assert len(fortunki.cache) == 2
 

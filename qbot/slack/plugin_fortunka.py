@@ -4,7 +4,7 @@ from sqlalchemy import func
 from qbot.core import registry
 from qbot.db import fortunki
 from qbot.slack.command import add_command
-from qbot.slack.message import IncomingMessage, send_reply
+from qbot.slack.message import IncomingMessage, TextWithButton, send_reply
 from qbot.utils import add_recently_seen, get_recently_seen
 
 
@@ -32,7 +32,10 @@ async def fortunka_cmd(message: IncomingMessage):
         if result is None:
             await send_reply(message, text="Nie ma fortunek :(")
             return
-    await send_reply(message, text=result["text"])
+    await send_reply(
+        message,
+        blocks=[TextWithButton(text=result["text"], button_text=str(result["id"]))],
+    )
     await add_recently_seen(fortunki, result["id"])
 
 
