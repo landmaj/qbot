@@ -51,17 +51,30 @@ async def janusz(message: IncomingMessage):
     await send_reply(message, blocks=[Image(image_url, alt_text)])
 
 
-@add_command("nosacz", "halynka dawaj mnie tu te memy", group="nosacze")
+@add_command("nosacz", "`!nosacz [-- ID]`", group="nosacze")
 async def nosacz(message: IncomingMessage):
-    recently_seen = await get_recently_seen(nosacze)
-    query = nosacze.select()
-    if len(recently_seen) != 0:
-        query = query.where(nosacze.c.id.notin_(recently_seen))
-    query = query.order_by(func.random()).limit(1)
-    result = await registry.database.fetch_one(query)
-    if result is None:
-        await send_reply(message, text="Nosacze wyginęły :(")
-        return
+    if message.text:
+        try:
+            identifier = int(message.text)
+        except ValueError:
+            await send_reply(message, text="Niepoprawne ID.")
+            return
+        result = await registry.database.fetch_one(
+            nosacze.select().where(nosacze.c.id == identifier)
+        )
+        if result is None:
+            await send_reply(message, text=f"Nie ma nosacza o ID {identifier}.")
+            return
+    else:
+        recently_seen = await get_recently_seen(nosacze)
+        query = nosacze.select()
+        if len(recently_seen) != 0:
+            query = query.where(nosacze.c.id.notin_(recently_seen))
+        query = query.order_by(func.random()).limit(1)
+        result = await registry.database.fetch_one(query)
+        if result is None:
+            await send_reply(message, text="Nosacze wyginęły :(")
+            return
     await send_reply(message, blocks=[Image(result["url"], "nosacz")])
     await add_recently_seen(nosacze, result["id"])
 
