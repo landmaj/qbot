@@ -6,7 +6,7 @@ from fuzzywuzzy import process
 from sqlalchemy import func, select
 
 from qbot.core import registry
-from qbot.db import fortunki, nosacze
+from qbot.db import feels, fortunki, nosacze
 from qbot.slack.message import IncomingMessage, send_reply
 from qbot.utils import get_recently_seen
 
@@ -84,12 +84,17 @@ async def top_command(message: IncomingMessage):
         select([func.count()]).select_from(nosacze)
     )
     n_rollover = n_cnt - len(await get_recently_seen(nosacze))
+    sn_cnt = await registry.database.fetch_val(
+        select([func.count()]).select_from(feels)
+    )
+    sn_rollover = n_cnt - len(await get_recently_seen(feels))
     text = (
         f"*Revision:* {registry.REVISION:.8}\n"
         f"*Uptime:* {uptime}\n"
         f"*Repository:* https://github.com/landmaj/qbot\n"
         f"*Fortunki:* {f_cnt}; cache reset in approx. {f_rollover}\n"
-        f"*Nosacze:* {n_cnt}; cache reset in approx. {n_rollover}"
+        f"*Nosacze:* {n_cnt}; cache reset in approx. {n_rollover}\n"
+        f"*Smutne nosacze:* {sn_cnt}; cache reset in approx. {sn_rollover}\n"
     )
     await send_reply(message, text=text)
 
