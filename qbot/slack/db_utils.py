@@ -41,7 +41,7 @@ async def add_urls(table: Table, urls: str) -> str:
     if len(rejected) != 0:
         text = "\n".join(rejected)
         incorrect_urls = (
-            f"*Poniższe wartości są niepoprawne i nie zostały dodane:*\n{text}",
+            f"*Poniższe wartości są niepoprawne i nie zostały dodane:*\n{text}"
         )
         response = f"{response}\n{incorrect_urls}"
     return response
