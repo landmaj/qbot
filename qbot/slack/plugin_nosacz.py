@@ -77,7 +77,7 @@ async def nosacz_dodaj(message: IncomingMessage):
 
 
 @add_command("feel", "`!feel [-- ID]`", group="nosacze")
-async def nosacz(message: IncomingMessage):
+async def feel(message: IncomingMessage):
     identifier = None
     if message.text:
         try:
@@ -98,6 +98,6 @@ async def nosacz(message: IncomingMessage):
     group="nosacze",
     safe_to_fix=False,
 )
-async def nosacz_dodaj(message: IncomingMessage):
+async def feel_dodaj(message: IncomingMessage):
     text = await add_urls(feels, message.text)
     await send_reply(message, text=text)
