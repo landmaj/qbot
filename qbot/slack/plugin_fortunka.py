@@ -1,37 +1,25 @@
 from asyncpg import UniqueViolationError
-from sqlalchemy import func
 
 from qbot.core import registry
 from qbot.db import fortunki
 from qbot.slack.command import add_command
+from qbot.slack.db_utils import query_with_recently_seen
 from qbot.slack.message import IncomingMessage, TextWithButton, send_reply
-from qbot.utils import add_recently_seen, get_recently_seen
+from qbot.utils import add_recently_seen
 
 
 @add_command("fortunka", "`!fortunka [-- ID]`", group="fortunki")
 async def fortunka_cmd(message: IncomingMessage):
+    identifier = None
     if message.text:
         try:
             identifier = int(message.text)
         except ValueError:
             await send_reply(message, text="Niepoprawne ID.")
             return
-        result = await registry.database.fetch_one(
-            fortunki.select().where(fortunki.c.id == identifier)
-        )
-        if result is None:
-            await send_reply(message, text=f"Nie ma fortunki o ID {identifier}.")
-            return
-    else:
-        recently_seen = await get_recently_seen(fortunki)
-        query = fortunki.select()
-        if len(recently_seen) != 0:
-            query = query.where(fortunki.c.id.notin_(recently_seen))
-        query = query.order_by(func.random()).limit(1)
-        result = await registry.database.fetch_one(query)
-        if result is None:
-            await send_reply(message, text="Nie ma fortunek :(")
-            return
+    result = await query_with_recently_seen(fortunki, identifier)
+    if result is None:
+        return send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
     await send_reply(
         message,
         blocks=[TextWithButton(text=result["text"], button_text=str(result["id"]))],

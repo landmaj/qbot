@@ -24,7 +24,7 @@ async def test_no_fortunkas(client):
     }
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        mock.assert_called_once_with(ANY, text="Nie ma fortunek :(")
+        mock.assert_called_once_with(ANY, text="O cokolwiek prosiłeś - nie istnieje.")
     assert response.status_code == 200
     assert response.text == "OK"
 
@@ -170,6 +170,6 @@ async def test_fortunka_id_not_an_integer(client):
     await registry.database.execute(query=fortunki.insert(), values={"text": "qwerty"})
     with patch("qbot.slack.plugin_fortunka.send_reply", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
-        mock.assert_called_once_with(ANY, text=f"Nie ma fortunki o ID 2137.")
+        mock.assert_called_once_with(ANY, text=f"O cokolwiek prosiłeś - nie istnieje.")
     assert response.status_code == 200
     assert response.text == "OK"

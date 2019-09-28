@@ -1,15 +1,13 @@
 import logging
 
-import validators
 from bs4 import BeautifulSoup
-from sqlalchemy import func
-from sqlalchemy.dialects.postgresql import insert
 
 from qbot.core import registry
 from qbot.db import nosacze
 from qbot.slack.command import add_command
+from qbot.slack.db_utils import add_urls, query_with_recently_seen
 from qbot.slack.message import Image, IncomingMessage, send_reply
-from qbot.utils import add_recently_seen, get_recently_seen
+from qbot.utils import add_recently_seen
 
 logger = logging.getLogger(__name__)
 
@@ -53,28 +51,16 @@ async def janusz(message: IncomingMessage):
 
 @add_command("nosacz", "`!nosacz [-- ID]`", group="nosacze")
 async def nosacz(message: IncomingMessage):
+    identifier = None
     if message.text:
         try:
             identifier = int(message.text)
         except ValueError:
             await send_reply(message, text="Niepoprawne ID.")
             return
-        result = await registry.database.fetch_one(
-            nosacze.select().where(nosacze.c.id == identifier)
-        )
-        if result is None:
-            await send_reply(message, text=f"Nie ma nosacza o ID {identifier}.")
-            return
-    else:
-        recently_seen = await get_recently_seen(nosacze)
-        query = nosacze.select()
-        if len(recently_seen) != 0:
-            query = query.where(nosacze.c.id.notin_(recently_seen))
-        query = query.order_by(func.random()).limit(1)
-        result = await registry.database.fetch_one(query)
-        if result is None:
-            await send_reply(message, text="Nosacze wyginęły :(")
-            return
+    result = await query_with_recently_seen(nosacze, identifier)
+    if result is None:
+        return send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
     await send_reply(message, blocks=[Image(result["url"], "nosacz")])
     await add_recently_seen(nosacze, result["id"])
 
@@ -86,24 +72,5 @@ async def nosacz(message: IncomingMessage):
     safe_to_fix=False,
 )
 async def nosacz_dodaj(message: IncomingMessage):
-    validated, rejected = [], []
-    for line in message.text.split("\n"):
-        # for some reason Slack adds triangular brackets to URLs
-        line = line.strip("<> ")
-        if validators.url(line):
-            validated.append(line)
-        else:
-            rejected.append(line)
-    if len(validated) == 0:
-        await send_reply(message, text="Nie podałeś żadnych poprawnych URL-i.")
-        return
-    query = insert(nosacze).on_conflict_do_nothing(index_elements=["url"])
-    values = [{"url": x} for x in validated]
-    await registry.database.execute_many(query, values)
-    await send_reply(message, text=f"Nowe nosacze: {len(validated)}.")
-    if len(rejected) != 0:
-        text = "\n".join(rejected)
-        await send_reply(
-            message,
-            text=f"*Poniższe wartości są niepoprawne i nie zostały dodane:*\n{text}",
-        )
+    text = await add_urls(nosacze, message.text)
+    await send_reply(message, text=text)
