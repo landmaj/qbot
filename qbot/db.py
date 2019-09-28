@@ -21,7 +21,7 @@ feels = sqlalchemy.Table(
     "feels",
     metadata,
     Column("id", Integer, primary_key=True),
-    Column("text", Text, nullable=False, unique=True),
+    Column("url", Text, nullable=False, unique=True),
 )
 
 fortunki = sqlalchemy.Table(
