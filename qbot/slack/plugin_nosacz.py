@@ -3,7 +3,7 @@ import logging
 from bs4 import BeautifulSoup
 
 from qbot.core import registry
-from qbot.db import nosacze
+from qbot.db import feels, nosacze
 from qbot.slack.command import add_command
 from qbot.slack.db_utils import add_urls, query_with_recently_seen
 from qbot.slack.message import Image, IncomingMessage, send_reply
@@ -73,4 +73,31 @@ async def nosacz(message: IncomingMessage):
 )
 async def nosacz_dodaj(message: IncomingMessage):
     text = await add_urls(nosacze, message.text)
+    await send_reply(message, text=text)
+
+
+@add_command("feel", "`!feel [-- ID]`", group="nosacze")
+async def nosacz(message: IncomingMessage):
+    identifier = None
+    if message.text:
+        try:
+            identifier = int(message.text)
+        except ValueError:
+            await send_reply(message, text="Niepoprawne ID.")
+            return
+    result = await query_with_recently_seen(feels, identifier)
+    if result is None:
+        return send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+    await send_reply(message, blocks=[Image(result["url"], "nosacz")])
+    await add_recently_seen(nosacze, result["id"])
+
+
+@add_command(
+    "feel dodaj",
+    "`!feel dodaj -- https://example.com/image.jpg`",
+    group="nosacze",
+    safe_to_fix=False,
+)
+async def nosacz_dodaj(message: IncomingMessage):
+    text = await add_urls(feels, message.text)
     await send_reply(message, text=text)

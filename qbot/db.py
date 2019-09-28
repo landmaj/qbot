@@ -17,6 +17,13 @@ nosacze = sqlalchemy.Table(
     Column("url", Text, nullable=False, unique=True),
 )
 
+feels = sqlalchemy.Table(
+    "feels",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("text", Text, nullable=False, unique=True),
+)
+
 fortunki = sqlalchemy.Table(
     "fortunki",
     metadata,
