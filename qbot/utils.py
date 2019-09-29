@@ -31,8 +31,12 @@ async def add_recently_seen(table: Table, value: int) -> None:
 
 
 async def set_max_cache_size(table: Table):
-    count = await registry.database.fetch_val(select([func.count()]).select_from(table))
-    if count == 0:
+    cnt = await count(table)
+    if cnt == 0:
         table.max_cache_size = 0
     else:
-        table.max_cache_size = count - 1
+        table.max_cache_size = cnt - 1
+
+
+async def count(table: Table) -> int:
+    return await registry.database.fetch_val(select([func.count()]).select_from(table))
