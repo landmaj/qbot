@@ -59,13 +59,13 @@ jobs:
           pre-commit install
       - name: Run autoflake
         run: |
-          pre-commit run autoflake --all-files
+          pre-commit run autoflake --all-files --show-diff-on-failure
       - name: Run isort
         run: |
-          pre-commit run isort --all-files
+          pre-commit run isort --all-files --show-diff-on-failure
       - name: Run black
         run: |
-          pre-commit run black --all-files
+          pre-commit run black --all-files --show-diff-on-failure
   deploy:
     needs: [pytest, lint]
     runs-on: ubuntu-18.04
