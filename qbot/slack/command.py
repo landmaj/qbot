@@ -3,7 +3,6 @@ from functools import lru_cache, wraps
 from typing import Optional, Tuple
 
 from fuzzywuzzy import process
-from sqlalchemy import func, select
 
 from qbot.core import registry
 from qbot.db import feels, fortunki, nosacze
