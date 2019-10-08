@@ -37,3 +37,7 @@ and push your code.
 git remote add dokku dokku@dokku_server:qbot
 git push dokku master
 ```
+
+## License
+
+This project is released under the [MIT License](LICENSE).
