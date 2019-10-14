@@ -111,13 +111,14 @@ async def test_fortunka_dodaj_unique_violation(client):
 
 
 @pytest.mark.asyncio
-async def test_fortunka(client):
+@pytest.mark.parametrize("command", ["fortunka", "f", "funia"])
+async def test_fortunka(client, command):
     event = {
         "event": {
             "type": "message",
             "channel": "C2147483705",
             "user": "U2147483697",
-            "text": "!fortunka",
+            "text": f"!{command}",
             "ts": "1355517523.000005",
         },
         "event_id": "Ev9UQ52YNA",

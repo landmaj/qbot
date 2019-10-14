@@ -18,6 +18,7 @@ def add_command(
     description: str,
     group: Optional[str] = None,
     safe_to_fix: bool = True,
+    aliases: list = [],
 ):
     """
     Add a new !command to be used in chat messages.
@@ -28,6 +29,7 @@ def add_command(
            to miscellaneous
     :param safe_to_fix: whether command can be automatically called after
            fuzzy matching
+    :param aliases: additional keywords, not listed in the help message
     """
 
     def decorator(function):
@@ -36,6 +38,8 @@ def add_command(
             return function(message)
 
         COMMANDS[keyword] = wrapper
+        for alias in aliases:
+            COMMANDS[alias] = wrapper
         DESCRIPTIONS[group][keyword] = description
         wrapper.safe_to_fix = safe_to_fix
 

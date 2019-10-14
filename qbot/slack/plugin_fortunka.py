@@ -8,7 +8,9 @@ from qbot.slack.message import IncomingMessage, TextWithButton, send_reply
 from qbot.utils import add_recently_seen
 
 
-@add_command("fortunka", "`!fortunka [-- ID]`", group="fortunki")
+@add_command(
+    "fortunka", "`!fortunka [-- ID]`", group="fortunki", aliases=["f", "funia"]
+)
 async def fortunka_cmd(message: IncomingMessage):
     identifier = None
     if message.text:

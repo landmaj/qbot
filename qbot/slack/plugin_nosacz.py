@@ -12,7 +12,12 @@ from qbot.utils import add_recently_seen
 logger = logging.getLogger(__name__)
 
 
-@add_command("janusz", "losowe memiszcze z janusznosacz.pl", group="nosacze")
+@add_command(
+    "janusz",
+    "losowe memiszcze z janusznosacz.pl",
+    group="nosacze",
+    aliases=["j", "janush"],
+)
 async def janusz(message: IncomingMessage):
     while True:
         async with registry.http_session.get(
@@ -49,7 +54,7 @@ async def janusz(message: IncomingMessage):
     await send_reply(message, blocks=[Image(image_url, alt_text)])
 
 
-@add_command("nosacz", "`!nosacz [-- ID]`", group="nosacze")
+@add_command("nosacz", "`!nosacz [-- ID]`", group="nosacze", aliases=["n", "no"])
 async def nosacz(message: IncomingMessage):
     identifier = None
     if message.text:
