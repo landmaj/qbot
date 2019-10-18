@@ -65,7 +65,8 @@ async def nosacz(message: IncomingMessage):
             return
     result = await query_with_recently_seen(nosacze, identifier)
     if result is None:
-        return send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        await send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        return
     await send_reply(message, blocks=[Image(result["url"], "nosacz")])
     await add_recently_seen(nosacze, result["id"])
 
@@ -92,7 +93,8 @@ async def feel(message: IncomingMessage):
             return
     result = await query_with_recently_seen(feels, identifier)
     if result is None:
-        return send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        await send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        return
     await send_reply(message, blocks=[Image(result["url"], "smutny nosacz")])
     await add_recently_seen(feels, result["id"])
 

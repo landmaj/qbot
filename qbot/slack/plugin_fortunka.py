@@ -21,7 +21,8 @@ async def fortunka_cmd(message: IncomingMessage):
             return
     result = await query_with_recently_seen(fortunki, identifier)
     if result is None:
-        return send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        await send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        return
     await send_reply(
         message,
         blocks=[TextWithButton(text=result["text"], button_text=str(result["id"]))],
