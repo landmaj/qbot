@@ -21,6 +21,7 @@ class Registry:
         self.SENTRY_DSN = config("Q_SENTRY_DSN", cast=Secret, default=None)
         self.TESTING = config("TESTING", cast=bool, default=False)
         self.DEPLOY_TIMESTAMP = config("DEPLOY_TIMESTAMP", cast=int, default=None)
+        self.STATSD_URL = config("STATSD_URL", default=None)
 
     async def setup(self, starlette: Starlette = None):
         self.set_config_vars()
@@ -28,7 +29,7 @@ class Registry:
         if self.SENTRY_DSN:
             sentry_sdk.init(dsn=str(self.SENTRY_DSN), release=self.REVISION)
         if self.SENTRY_DSN and starlette:
-            SentryAsgiMiddleware(starlette)
+            starlette.add_middleware(SentryAsgiMiddleware)
 
         self.http_session = aiohttp.ClientSession()
 

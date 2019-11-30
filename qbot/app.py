@@ -23,7 +23,7 @@ async def ping(request: Request):
 
 @app.on_event("startup")
 async def setup_registry():
-    await registry.setup()
+    await registry.setup(app)
 
 
 @app.on_event("shutdown")
