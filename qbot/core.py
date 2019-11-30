@@ -1,14 +1,18 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Optional
 
 import aiohttp
 import databases
+import rfc3986
 import sentry_sdk
+import statsd
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.applications import Starlette
 from starlette.config import Config
 from starlette.datastructures import Secret
 
+logger = logging.getLogger(__name__)
 
 # noinspection PyAttributeOutsideInit
 class Registry:
@@ -28,8 +32,16 @@ class Registry:
 
         if self.SENTRY_DSN:
             sentry_sdk.init(dsn=str(self.SENTRY_DSN), release=self.REVISION)
+        else:
+            logger.warning("Sentry integration is disabled.")
         if self.SENTRY_DSN and starlette:
             starlette.add_middleware(SentryAsgiMiddleware)
+
+        if self.STATSD_URL:
+            statsd_url = rfc3986.urlparse(self.STATSD_URL)
+            self.statsd = statsd.StatsClient(host=statsd_url.host, port=statsd_url.port)
+        else:
+            logger.warning("StatsD integration is disabled.")
 
         self.http_session = aiohttp.ClientSession()
 
