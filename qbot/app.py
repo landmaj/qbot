@@ -36,15 +36,13 @@ async def teardown_registry():
 
 @app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
+    metrics.incr("endpoint.slack")
     try:
         if not await verify_signature(request):
-            metrics.incr("endpoint.slack.invalid")
             return PlainTextResponse("Incorrect signature.", 403)
     except Exception as exc:
         capture_exception(exc)
-        metrics.incr("endpoint.slack.invalid")
         return PlainTextResponse("Could not verify signature.", 400)
-    metrics.incr("endpoint.slack.valid")
 
     data = await request.json()
     if "challenge" in data:
