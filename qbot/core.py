@@ -39,7 +39,9 @@ class Registry:
 
         if self.STATSD_URL:
             statsd_url = rfc3986.urlparse(self.STATSD_URL)
-            self.statsd = statsd.StatsClient(host=statsd_url.host, port=statsd_url.port)
+            self.statsd = statsd.StatsClient(
+                host=statsd_url.host, port=statsd_url.port, prefix="qbot"
+            )
         else:
             logger.warning("StatsD integration is disabled.")
 
