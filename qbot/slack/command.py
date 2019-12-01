@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 
 from fuzzywuzzy import process
 
-from qbot import metrics
 from qbot.core import registry
 from qbot.db import feels, fortunki, nosacze
 from qbot.slack.message import IncomingMessage, send_reply
@@ -36,7 +35,6 @@ def add_command(
     def decorator(function):
         @wraps(function)
         def wrapper(message: IncomingMessage):
-            metrics.incr(f"function.{function.__name__}")
             return function(message)
 
         COMMANDS[keyword] = wrapper

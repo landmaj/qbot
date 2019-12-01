@@ -1,6 +1,5 @@
 from functools import wraps
 
-from qbot import metrics
 from qbot.slack.command import COMMANDS, fuzzy_match
 from qbot.slack.message import IncomingMessage, send_reply
 
@@ -44,7 +43,6 @@ async def message_handler(event: dict):
         else:
             message.text = ""
 
-        metrics.incr(f"command.{command}")
         if command in COMMANDS:
             await COMMANDS[command](message)
         elif fuzzy_match(command):

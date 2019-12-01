@@ -4,9 +4,7 @@ from typing import Optional
 
 import aiohttp
 import databases
-import rfc3986
 import sentry_sdk
-import statsd
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.applications import Starlette
 from starlette.config import Config
@@ -25,7 +23,6 @@ class Registry:
         self.SENTRY_DSN = config("Q_SENTRY_DSN", cast=Secret, default=None)
         self.TESTING = config("TESTING", cast=bool, default=False)
         self.DEPLOY_TIMESTAMP = config("DEPLOY_TIMESTAMP", cast=int, default=None)
-        self.STATSD_URL = config("STATSD_URL", default=None)
 
     async def setup(self, starlette: Starlette = None):
         self.set_config_vars()
@@ -36,14 +33,6 @@ class Registry:
             logger.warning("Sentry integration is disabled.")
         if self.SENTRY_DSN and starlette:
             starlette.add_middleware(SentryAsgiMiddleware)
-
-        if self.STATSD_URL:
-            statsd_url = rfc3986.urlparse(self.STATSD_URL)
-            self.statsd = statsd.StatsClient(
-                host=statsd_url.host, port=statsd_url.port, prefix="qbot"
-            )
-        else:
-            logger.warning("StatsD integration is disabled.")
 
         self.http_session = aiohttp.ClientSession()
 
