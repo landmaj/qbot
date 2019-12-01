@@ -5,6 +5,7 @@ from typing import Optional
 import aiohttp
 import databases
 import sentry_sdk
+from ploki import BasicAuth, Ploki
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.applications import Starlette
 from starlette.config import Config
@@ -23,9 +24,19 @@ class Registry:
         self.SENTRY_DSN = config("Q_SENTRY_DSN", cast=Secret, default=None)
         self.TESTING = config("TESTING", cast=bool, default=False)
         self.DEPLOY_TIMESTAMP = config("DEPLOY_TIMESTAMP", cast=int, default=None)
+        self.LOKI_URL = config("LOKI_URL", default="localhost:3100")
+        self.LOKI_USER = config("LOKI_USER", default="")
+        self.LOKI_PASSWORD = config("LOKI_PASSWORD", cast=Secret, default="")
 
     async def setup(self, starlette: Starlette = None):
         self.set_config_vars()
+
+        self.ploki = Ploki(
+            url=self.LOKI_URL,
+            auth=BasicAuth(self.LOKI_USER, str(self.LOKI_PASSWORD)),
+            app_name="qbot",
+            level=logging.INFO,
+        )
 
         if self.SENTRY_DSN:
             sentry_sdk.init(dsn=str(self.SENTRY_DSN), release=self.REVISION)
@@ -43,6 +54,8 @@ class Registry:
         else:
             self.database = databases.Database(registry.DATABASE_URL)
         await self.database.connect()
+
+        logger.info("Registry setup finished.")
 
     async def teardown(self):
         await self.http_session.close()
