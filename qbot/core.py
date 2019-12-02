@@ -31,10 +31,10 @@ class Registry:
     async def setup(self, starlette: Starlette = None):
         self.set_config_vars()
 
-        self.ploki = Ploki(
+        Ploki().initialize(
             url=self.LOKI_URL,
             auth=BasicAuth(self.LOKI_USER, str(self.LOKI_PASSWORD)),
-            app_name="qbot",
+            labels={"application": "qbot"},
             level=logging.INFO,
         )
 
