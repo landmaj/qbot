@@ -1,7 +1,7 @@
 import logging
 from functools import wraps
 
-from qbot.slack.command import COMMANDS, fuzzy_match
+from qbot.slack.command import ALIASES, COMMANDS, fuzzy_match
 from qbot.slack.message import IncomingMessage, send_reply
 
 EVENTS = {}
@@ -52,8 +52,8 @@ async def message_handler(event: dict):
         else:
             message.text = ""
 
-        if command in COMMANDS:
-            handler = COMMANDS[command]
+        handler = {**COMMANDS, **ALIASES}.get(command)
+        if handler:
             logger.info(
                 f"Executing `{command}`.",
                 extra={

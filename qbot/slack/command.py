@@ -10,6 +10,7 @@ from qbot.slack.message import IncomingMessage, send_reply
 from qbot.utils import count
 
 COMMANDS = {}
+ALIASES = {}
 DESCRIPTIONS = defaultdict(lambda: defaultdict())
 
 
@@ -39,7 +40,7 @@ def add_command(
 
         COMMANDS[keyword] = wrapper
         for alias in aliases:
-            COMMANDS[alias] = wrapper
+            ALIASES[alias] = wrapper
         DESCRIPTIONS[group][keyword] = description
         wrapper.safe_to_fix = safe_to_fix
 
