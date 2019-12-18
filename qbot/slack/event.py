@@ -40,8 +40,8 @@ async def message_handler(event: dict):
     )
     logger.info(
         f"Message received: "
-        f"chanel={message.channel} |"
-        f"user={message.user} |"
+        f"chanel={message.channel} | "
+        f"user={message.user} | "
         f"text={message.text}"
     )
     if message.text.startswith("!") and message.user != "BOT":
@@ -57,9 +57,11 @@ async def message_handler(event: dict):
             logger.info(
                 f"Executing `{command}`.",
                 extra={
-                    "user": message.user,
-                    "command": command,
-                    "function": handler.__name__,
+                    "labels": {
+                        "user": message.user,
+                        "command": command,
+                        "function": handler.__name__,
+                    }
                 },
             )
             await handler(message)
@@ -70,9 +72,11 @@ async def message_handler(event: dict):
                 logger.info(
                     f"Executing fixed `{fixed_cmd}`.",
                     extra={
-                        "user": message.user,
-                        "command": fixed_cmd,
-                        "function": handler.__name__,
+                        "labels": {
+                            "user": message.user,
+                            "command": fixed_cmd,
+                            "function": handler.__name__,
+                        }
                     },
                 )
                 await send_reply(message, text=f"FTFY: {command} -> {fixed_cmd}")
