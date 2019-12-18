@@ -36,10 +36,6 @@ async def teardown_registry():
 
 @app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
-    logger.info(
-        f"Incoming request from Slack. Body: {await request.body()}",
-        extra={"client": str(request.client.host)},
-    )
     try:
         if not await verify_signature(request):
             return PlainTextResponse("Incorrect signature.", 403)
