@@ -5,7 +5,7 @@ from typing import Optional
 import aiohttp
 import databases
 import sentry_sdk
-from ploki import BasicAuth, Ploki
+from ploki import BasicAuth, Ploki, ignore_logger
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.applications import Starlette
 from starlette.config import Config
@@ -28,15 +28,23 @@ class Registry:
         self.LOKI_USER = config("LOKI_USER", default="")
         self.LOKI_PASSWORD = config("LOKI_PASSWORD", cast=Secret, default="")
 
-    async def setup(self, starlette: Starlette = None):
-        self.set_config_vars()
+    def setup_ploki(self):
+        def add_app_name(event, log):
+            event["stream"]["application"] = "qbot"
+            return event
 
         Ploki().initialize(
             url=self.LOKI_URL,
             auth=BasicAuth(self.LOKI_USER, str(self.LOKI_PASSWORD)),
-            labels={"application": "qbot"},
             level=logging.INFO,
+            processors=(add_app_name,),
         )
+        ignore_logger("uvicorn")
+
+    async def setup(self, starlette: Starlette = None):
+        self.set_config_vars()
+
+        self.setup_ploki()
 
         if self.SENTRY_DSN:
             sentry_sdk.init(dsn=str(self.SENTRY_DSN), release=self.REVISION)

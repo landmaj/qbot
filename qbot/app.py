@@ -1,3 +1,5 @@
+import logging
+
 from sentry_sdk import capture_exception
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
@@ -9,6 +11,7 @@ from qbot.slack.event import process_slack_event
 from qbot.slack.utils import verify_signature
 
 app = Starlette()
+logger = logging.getLogger(__name__)
 
 
 @app.route("/")
@@ -33,6 +36,10 @@ async def teardown_registry():
 
 @app.route("/slack", methods=["POST"])
 async def slack_handler(request: Request):
+    logger.info(
+        f"Incoming request from Slack. Body: {await request.body()}",
+        extra={"client": str(request.client.host)},
+    )
     try:
         if not await verify_signature(request):
             return PlainTextResponse("Incorrect signature.", 403)

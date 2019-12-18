@@ -1,9 +1,12 @@
+import logging
 from functools import wraps
 
 from qbot.slack.command import COMMANDS, fuzzy_match
 from qbot.slack.message import IncomingMessage, send_reply
 
 EVENTS = {}
+
+logger = logging.getLogger(__name__)
 
 
 def add_event(event_type: str):
@@ -42,6 +45,11 @@ async def message_handler(event: dict):
             message.text = splitted_message[1].strip()
         else:
             message.text = ""
+
+        logger.info(
+            f"Command received. Message: {message}.",
+            extra={"command": command, "user": message.user},
+        )
 
         if command in COMMANDS:
             await COMMANDS[command](message)
