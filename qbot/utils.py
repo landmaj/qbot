@@ -44,4 +44,6 @@ async def count(table: Table) -> int:
 
 def sanitize_field(v: str) -> str:
     """Replace double quotes to fix Loki field parsing."""
-    return v.replace('"', "'")
+    v = v.replace("'", "\\'")
+    v = v.replace('"', "'")
+    return v
