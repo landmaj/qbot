@@ -40,3 +40,8 @@ async def set_max_cache_size(table: Table):
 
 async def count(table: Table) -> int:
     return await registry.database.fetch_val(select([func.count()]).select_from(table))
+
+
+def sanitize_field(v: str) -> str:
+    """Replace double quotes to fix Loki field parsing."""
+    return v.replace('"', "'")

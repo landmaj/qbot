@@ -11,6 +11,7 @@ from starlette.responses import PlainTextResponse
 from qbot.core import registry
 from qbot.slack.event import process_slack_event
 from qbot.slack.utils import verify_signature
+from qbot.utils import sanitize_field
 
 app = Starlette()
 app.add_middleware(SentryAsgiMiddleware)
@@ -53,5 +54,8 @@ async def slack_handler(request: Request):
     task = BackgroundTask(
         process_slack_event, event=data["event"], event_id=data["event_id"]
     )
-    logger.info(f"Incoming request for Slack endpoint. Body=`{json.dumps(data)}`")
+    logger.info(
+        f"Incoming request for Slack endpoint. "
+        f'Body="{sanitize_field(json.dumps(data))}"'
+    )
     return PlainTextResponse("OK", background=task)

@@ -3,6 +3,7 @@ from functools import wraps
 
 from qbot.slack.command import ALIASES, COMMANDS, fuzzy_match
 from qbot.slack.message import IncomingMessage, send_reply
+from qbot.utils import sanitize_field
 
 EVENTS = {}
 
@@ -42,7 +43,7 @@ async def message_handler(event: dict):
         f"Message received | "
         f"chanel={message.channel} | "
         f"user={message.user} | "
-        f"text=`{message.text}`"
+        f'text="{sanitize_field(message.text)}"'
     )
     if message.text.startswith("!") and message.user != "BOT":
         splitted_message = message.text.split("--", 1)
