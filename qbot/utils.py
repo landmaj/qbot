@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Set
 
@@ -42,8 +43,7 @@ async def count(table: Table) -> int:
     return await registry.database.fetch_val(select([func.count()]).select_from(table))
 
 
-def sanitize_field(v: str) -> str:
-    """Replace double quotes to fix Loki field parsing."""
-    v = v.replace("'", "\\'")
-    v = v.replace('"', "'")
-    return v
+def sanitize_json(v: dict) -> str:
+    """Replace double quotes in JSON to fix Loki field parsing."""
+    serialized = json.dumps(v)
+    return serialized.replace("'", "\\'").replace('"', "'")
