@@ -39,10 +39,10 @@ async def message_handler(event: dict):
         thread_ts=event.get("thread_ts"),
     )
     logger.info(
-        f"Message received: "
+        f"Message received | "
         f"chanel={message.channel} | "
         f"user={message.user} | "
-        f"text={message.text}"
+        f"text='{message.text}'"
     )
     if message.text.startswith("!") and message.user != "BOT":
         splitted_message = message.text.split("--", 1)
