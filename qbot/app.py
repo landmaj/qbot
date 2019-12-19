@@ -53,5 +53,5 @@ async def slack_handler(request: Request):
     task = BackgroundTask(
         process_slack_event, event=data["event"], event_id=data["event_id"]
     )
-    logger.info(f"Incoming request for Slack endpoint. Body='{json.dumps(data)}'")
+    logger.info(f"Incoming request for Slack endpoint. Body=`{json.dumps(data)}`")
     return PlainTextResponse("OK", background=task)

@@ -4,7 +4,6 @@ import time
 
 import sentry_sdk
 import uvicorn
-from httpx import BasicAuth
 from ploki import Ploki
 from starlette.config import environ
 
@@ -16,11 +15,6 @@ def setup_logging():
     logging.getLogger("loki").setLevel(logging.CRITICAL)
     revision = os.environ.get("GIT_REV", "N/A")
 
-    def add_app_details(event, log):
-        event["stream"]["application"] = "qbot"
-        event["stream"]["revision"] = revision
-        return event
-
     sentry_dsn = os.environ.get("Q_SENTRY_DSN")
     if sentry_dsn:
         sentry_sdk.init(dsn=sentry_dsn, release=revision)
@@ -31,9 +25,9 @@ def setup_logging():
 
     Ploki().initialize(
         url=loki_url,
-        auth=BasicAuth(loki_user, loki_pass),
+        tags={"application": "qbot", "revision": revision},
+        auth=(loki_user, loki_pass),
         level=logging.INFO,
-        processors=(add_app_details,),
     )
     logging.info("Logging setup finished.")
 

@@ -42,7 +42,7 @@ async def message_handler(event: dict):
         f"Message received | "
         f"chanel={message.channel} | "
         f"user={message.user} | "
-        f"text='{message.text}'"
+        f"text=`{message.text}`"
     )
     if message.text.startswith("!") and message.user != "BOT":
         splitted_message = message.text.split("--", 1)
@@ -57,7 +57,7 @@ async def message_handler(event: dict):
             logger.info(
                 f"Executing `{command}`.",
                 extra={
-                    "labels": {
+                    "tags": {
                         "user": message.user,
                         "command": command,
                         "function": handler.__name__,
@@ -72,7 +72,7 @@ async def message_handler(event: dict):
                 logger.info(
                     f"Executing fixed `{fixed_cmd}`.",
                     extra={
-                        "labels": {
+                        "tags": {
                             "user": message.user,
                             "command": fixed_cmd,
                             "function": handler.__name__,
