@@ -2,6 +2,7 @@ import json
 import logging
 
 from sentry_sdk import capture_exception
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.requests import Request
@@ -12,6 +13,7 @@ from qbot.slack.event import process_slack_event
 from qbot.slack.utils import verify_signature
 
 app = Starlette()
+app.add_middleware(SentryAsgiMiddleware)
 logger = logging.getLogger(__name__)
 
 
@@ -27,7 +29,7 @@ async def ping(request: Request):
 
 @app.on_event("startup")
 async def setup_registry():
-    await registry.setup(app)
+    await registry.setup()
 
 
 @app.on_event("shutdown")
