@@ -12,6 +12,8 @@ from qbot.app import app
 
 
 def setup_logging():
+    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger("loki").setLevel(logging.CRITICAL)
     revision = os.environ.get("GIT_REV", "N/A")
 
     def add_app_details(event, log):
@@ -23,7 +25,7 @@ def setup_logging():
     if sentry_dsn:
         sentry_sdk.init(dsn=sentry_dsn, release=revision)
 
-    loki_url = os.environ.get("LOKI_URL", "localhost:3100")
+    loki_url = os.environ.get("LOKI_URL", "http://localhost:3100")
     loki_user = os.environ.get("LOKI_USER", "")
     loki_pass = os.environ.get("LOKI_PASSWORD", "")
 
