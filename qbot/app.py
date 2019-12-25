@@ -1,5 +1,3 @@
-import logging
-
 from sentry_sdk import capture_exception
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from starlette.applications import Starlette
@@ -10,11 +8,9 @@ from starlette.responses import PlainTextResponse
 from qbot.core import registry
 from qbot.slack.event import process_slack_event
 from qbot.slack.utils import verify_signature
-from qbot.utils import sanitize_json
 
 app = Starlette()
 app.add_middleware(SentryAsgiMiddleware)
-logger = logging.getLogger(__name__)
 
 
 @app.route("/")
@@ -52,8 +48,5 @@ async def slack_handler(request: Request):
 
     task = BackgroundTask(
         process_slack_event, event=data["event"], event_id=data["event_id"]
-    )
-    logger.info(
-        f"Incoming request for Slack endpoint. " f'Body="{sanitize_json(data)}"'
     )
     return PlainTextResponse("OK", background=task)

@@ -24,7 +24,7 @@ async def janusz(message: IncomingMessage):
             "http://www.janusznosacz.pl/losuj"
         ) as resp:
             if not 200 <= resp.status < 400:
-                logging.error(
+                logger.error(
                     f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
                 )
                 await send_reply(message, "Oops, bot spadł z rowerka...")

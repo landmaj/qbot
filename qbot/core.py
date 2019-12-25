@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -7,7 +6,6 @@ import databases
 from starlette.config import Config
 from starlette.datastructures import Secret
 
-logger = logging.getLogger(__name__)
 
 # noinspection PyAttributeOutsideInit
 class Registry:
@@ -30,7 +28,6 @@ class Registry:
         else:
             self.database = databases.Database(registry.DATABASE_URL)
         await self.database.connect()
-        logger.info("Registry setup finished.")
 
     async def teardown(self):
         await self.http_session.close()

@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 from typing import Set
 
@@ -41,9 +40,3 @@ async def set_max_cache_size(table: Table):
 
 async def count(table: Table) -> int:
     return await registry.database.fetch_val(select([func.count()]).select_from(table))
-
-
-def sanitize_json(v: dict) -> str:
-    """Replace double quotes in JSON to fix Loki field parsing."""
-    serialized = json.dumps(v)
-    return serialized.replace("'", "\\'").replace('"', "'")

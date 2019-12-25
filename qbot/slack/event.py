@@ -1,12 +1,9 @@
-import logging
 from functools import wraps
 
 from qbot.slack.command import ALIASES, COMMANDS, fuzzy_match
 from qbot.slack.message import IncomingMessage, send_reply
 
 EVENTS = {}
-
-logger = logging.getLogger(__name__)
 
 
 def add_event(event_type: str):
@@ -38,13 +35,6 @@ async def message_handler(event: dict):
         ts=event["ts"],
         thread_ts=event.get("thread_ts"),
     )
-    sanitized_text = message.text.replace('"', "'")
-    logger.info(
-        f"Message received | "
-        f"chanel={message.channel} | "
-        f"user={message.user} | "
-        f'text="{sanitized_text}"'
-    )
     if message.text.startswith("!") and message.user != "BOT":
         splitted_message = message.text.split("--", 1)
         command = splitted_message[0].lstrip("!").rstrip()
@@ -55,31 +45,11 @@ async def message_handler(event: dict):
 
         handler = {**COMMANDS, **ALIASES}.get(command)
         if handler:
-            logger.info(
-                f"Executing `{command}`.",
-                extra={
-                    "tags": {
-                        "user": message.user,
-                        "command": command,
-                        "function": handler.__name__,
-                    }
-                },
-            )
             await handler(message)
         elif fuzzy_match(command):
             fixed_cmd, ratio = fuzzy_match(command)
             handler = COMMANDS[fixed_cmd]
             if handler.safe_to_fix:
-                logger.info(
-                    f"Executing fixed `{fixed_cmd}`.",
-                    extra={
-                        "tags": {
-                            "user": message.user,
-                            "command": fixed_cmd,
-                            "function": handler.__name__,
-                        }
-                    },
-                )
                 await send_reply(message, text=f"FTFY: {command} -> {fixed_cmd}")
                 await handler(message)
             else:
