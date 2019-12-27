@@ -48,7 +48,7 @@ async def message_handler(event: dict):
             await handler(message)
         elif fuzzy_match(command):
             fixed_cmd, ratio = fuzzy_match(command)
-            handler = COMMANDS[fixed_cmd]
+            handler = {**COMMANDS, **ALIASES}[fixed_cmd]
             if handler.safe_to_fix:
                 await send_reply(message, text=f"FTFY: {command} -> {fixed_cmd}")
                 await handler(message)
