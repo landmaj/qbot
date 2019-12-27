@@ -62,7 +62,8 @@ async def test_not_safe_to_fix_typo(client):
         with patch("qbot.slack.command.send_reply", new=CoroutineMock()) as cmd_mock:
             response = await send_slack_request(event, client)
             event_mock.assert_called_once_with(
-                ANY, text="Jestem w 96% pewien, że chodziło o `fortunka dodaj`."
+                ANY,
+                text="Jestem w 96% pewien, że chodziło o `fortunka dodaj`. Spróbuj ponownie.",
             )
             cmd_mock.assert_not_called()
     assert response.status_code == 200

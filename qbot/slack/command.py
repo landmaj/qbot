@@ -56,6 +56,10 @@ def fuzzy_match(
     match = process.extractBests(
         mistyped_command, COMMANDS.keys(), score_cutoff=score_cutoff, limit=1
     )
+    if len(match) == 0:
+        match = process.extractBests(
+            mistyped_command, ALIASES.keys(), score_cutoff=score_cutoff, limit=1
+        )
     return match[0] if len(match) != 0 else None
 
 

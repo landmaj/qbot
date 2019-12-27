@@ -55,7 +55,10 @@ async def message_handler(event: dict):
             else:
                 await send_reply(
                     message,
-                    text=f"Jestem w {ratio}% pewien, że chodziło o `{fixed_cmd}`.",
+                    text=(
+                        f"Jestem w {ratio}% pewien, że chodziło o `{fixed_cmd}`. "
+                        f"Spróbuj ponownie."
+                    ),
                 )
         else:
             await send_reply(message, text=f"Nieznane polecenie: {command}")
