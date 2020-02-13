@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 async def excuse_command(message: IncomingMessage) -> None:
     if message.text:
         splitted_message = message.text.split(" ", 1)
+        logger.error(message.text)
         if not splitted_message[0].startswith("#"):
             await send_reply(message, text="Nazwa kanału powinna zaczynać się `#`.")
             return
