@@ -478,7 +478,7 @@ EXCUSES = [
 
 
 @add_command(
-    "wymówka", "Nie działa i potrzebujesz wymówki?", aliases=["wymowka", "excuse"]
+    "wymówka", "Nie działa i potrzebujesz wymówki?", aliases=["wymowka", "excuse", "w"]
 )
 async def excuse_command(message: IncomingMessage) -> None:
     excuse = random.choice(EXCUSES) if EXCUSES else "Wymyśl sobie."

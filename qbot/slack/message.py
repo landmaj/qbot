@@ -10,6 +10,22 @@ SLACK_URL = "https://slack.com/api/"
 logger = logging.getLogger(__name__)
 
 
+async def delete_message(message: "IncomingMessage") -> None:
+    data = {"ts": message.ts, "channel": message.channel}
+    async with registry.http_session.post(
+        url=urljoin(SLACK_URL, "chat.delete"),
+        json=data,
+        headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
+    ) as resp:
+        if not 200 <= resp.status < 400:
+            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+            return
+        body = await resp.json()
+        if not body["ok"]:
+            error = body["error"]
+            logger.error(f"Slack returned an error: {error}. Request body: {data}.")
+
+
 async def send_message(message: "OutgoingMessage") -> None:
     data = message.to_dict()
     async with registry.http_session.post(
