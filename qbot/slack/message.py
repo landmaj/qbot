@@ -1,6 +1,7 @@
 import abc
 import logging
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import List, Optional
 from urllib.parse import urljoin
 
@@ -8,6 +9,26 @@ from qbot.core import registry
 
 SLACK_URL = "https://slack.com/api/"
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=16)
+async def get_channel_id(channel_name: str) -> Optional[str]:
+    data = {}
+    async with registry.http_session.get(
+        url=urljoin(SLACK_URL, "conversations.list"),
+        params={"exclude_archived": "true", "types": "public_channel"},
+        headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
+    ) as resp:
+        if not 200 <= resp.status < 400:
+            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+            return
+        body = await resp.json()
+        if not body["ok"]:
+            error = body["error"]
+            logger.error(f"Slack returned an error: {error}. Request body: {data}.")
+            return None
+        name_to_id = {ch["name"]: ch["id"] for ch in body["channels"]}
+        return name_to_id.get(channel_name)
 
 
 async def send_message(message: "OutgoingMessage") -> None:
