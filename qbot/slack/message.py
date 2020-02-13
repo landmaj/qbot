@@ -10,7 +10,7 @@ SLACK_URL = "https://slack.com/api/"
 logger = logging.getLogger(__name__)
 
 
-async def send_message(message: "OutgoingMessage") -> None:
+async def send_message(message: "OutgoingMessage") -> bool:
     data = message.to_dict()
     async with registry.http_session.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
@@ -19,18 +19,20 @@ async def send_message(message: "OutgoingMessage") -> None:
     ) as resp:
         if not 200 <= resp.status < 400:
             logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
-            return
+            return False
         body = await resp.json()
         if not body["ok"]:
             error = body["error"]
             logger.error(f"Slack returned an error: {error}. Request body: {data}.")
+            return False
+        return True
 
 
 async def send_reply(
     reply_to: "IncomingMessage",
     text: Optional[str] = None,
     blocks: Optional[List["Block"]] = None,
-) -> None:
+) -> bool:
     if text and blocks:
         raise Exception("Text and blocks cannot be used at the same time.")
     elif text:
@@ -41,7 +43,7 @@ async def send_reply(
         message = OutgoingMessage(
             channel=reply_to.channel, thread_ts=reply_to.thread_ts, blocks=blocks
         )
-    await send_message(message)
+    return await send_message(message)
 
 
 @dataclass()
