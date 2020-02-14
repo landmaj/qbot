@@ -12,6 +12,7 @@ from qbot.db import (
     query_with_recently_seen,
 )
 from qbot.message import Image, IncomingMessage, send_reply
+from qbot.plugins.excuse import bot_malfunction
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ async def janusz(message: IncomingMessage):
                 logger.error(
                     f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
                 )
-                await send_reply(message, "Oops, bot spadł z rowerka...")
+                await bot_malfunction(message)
                 return
             # random image sometimes returns an error and redirects to the home page
             if resp.url.path == "/":
@@ -53,7 +54,7 @@ async def janusz(message: IncomingMessage):
         )
     except Exception:
         logger.exception("Could not extract image source from the page.")
-        await send_reply(message, "Źródełko wyschło. :(")
+        await bot_malfunction(message)
         return
     await send_reply(message, blocks=[Image(image_url, alt_text)])
 
@@ -69,7 +70,7 @@ async def nosacz(message: IncomingMessage):
             return
     result = await query_with_recently_seen(nosacze, identifier)
     if result is None:
-        await send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        await send_reply(message, text="Nosaczy jak lodu, ale takiego nie ma.")
         return
     await send_reply(message, blocks=[Image(result["url"], "nosacz")])
     await add_recently_seen(nosacze, result["id"])

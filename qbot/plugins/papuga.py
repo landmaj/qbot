@@ -9,7 +9,7 @@ from qbot.message import (
     send_message,
     send_reply,
 )
-from qbot.plugins.excuse import excuse_command
+from qbot.plugins.excuse import bot_malfunction
 
 logger = logging.getLogger(__name__)
 CHANNEL_REGEX = re.compile(r"^<#(?P<channel_id>\w*)\|(?P<channel_name>\w*)>\s")
@@ -36,7 +36,6 @@ async def parrot_command(message: IncomingMessage) -> None:
                 blocks=[Text(message.text[match.end() :])],
             )
         ):
-            await send_reply(message, text="Oj, coś poszło nie tak...")
-            await excuse_command(message)
+            await bot_malfunction(message)
     else:
         await send_reply(message, text="Mówiłeś coś?")

@@ -9,11 +9,11 @@ async def ping_command(message: IncomingMessage) -> None:
     await send_reply(message, text="Pong!")
 
 
-@add_command("help", "show this message and exit")
+@add_command("help", "pokaż tę wiadomość i wyjdź")
 async def help_command(message: IncomingMessage) -> None:
     text = ""
     for group, commands in DESCRIPTIONS.items():
-        group = "MISCELLANEOUS" if group is None else group
+        group = "RÓŻNOŚCI" if group is None else group
         group_name = f"*{group.upper()}*"
         group_body = "\n".join(
             [f"*!{key}*: {value}" for key, value in commands.items()]
@@ -22,7 +22,7 @@ async def help_command(message: IncomingMessage) -> None:
     await send_reply(message, text=text)
 
 
-@add_command("top", "information about the bot")
+@add_command("top", "statystyki bota")
 async def top_command(message: IncomingMessage):
     uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
     text = (
@@ -36,7 +36,7 @@ async def top_command(message: IncomingMessage):
     await send_reply(message, text=text)
 
 
-@add_command("uptime", "time since last restart")
+@add_command("uptime", "czas od ostatniego restartu")
 async def uptime_command(message: IncomingMessage) -> None:
     if registry.uptime is None:
         await send_reply(message, text="N/A")
@@ -47,11 +47,11 @@ async def uptime_command(message: IncomingMessage) -> None:
     minutes = total_seconds % 3600 // 60
     seconds = total_seconds % 60
     if days:
-        text = f"*Uptime:* {days} days {hours} hours {minutes} minutes and {seconds} seconds"
+        text = f"*Uptime:* {days} dni {hours} godzin {minutes} minut i {seconds} sekund"
     elif hours:
-        text = f"*Uptime:* {hours} hours {minutes} minutes and {seconds} seconds"
+        text = f"*Uptime:* {hours} godzin {minutes} minut i {seconds} sekund"
     elif minutes:
-        text = f"*Uptime:* {minutes} minutes and {seconds} seconds"
+        text = f"*Uptime:* {minutes} minut i {seconds} sekund"
     else:
-        text = f"*Uptime:* {seconds} seconds"
+        text = f"*Uptime:* {seconds} sekund"
     await send_reply(message, text=text)

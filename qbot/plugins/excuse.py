@@ -483,3 +483,9 @@ EXCUSES = [
 async def excuse_command(message: IncomingMessage) -> None:
     excuse = random.choice(EXCUSES) if EXCUSES else "Wymyśl sobie."
     await send_reply(message, text=excuse)
+
+
+async def bot_malfunction(message: IncomingMessage) -> None:
+    text = random.choice(["Oopsy Daisy!", "Bot spadł z rowerka...", "Jebło!"])
+    await send_reply(message, text=text)
+    await excuse_command(message)

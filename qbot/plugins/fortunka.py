@@ -19,7 +19,9 @@ async def fortunka_cmd(message: IncomingMessage):
             return
     result = await query_with_recently_seen(fortunki, identifier)
     if result is None:
-        await send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
+        await send_reply(
+            message, text="Do 2137 fortunek jeszcze trochę. Tej o którą prosisz nie ma."
+        )
         return
     await send_reply(
         message,
@@ -41,6 +43,6 @@ async def fortunka_dodaj(message: IncomingMessage):
                 query=fortunki.insert(), values={"text": message.text}
             )
     except UniqueViolationError:
-        await send_reply(message, text="Taka fortunka już istnieje.")
+        await send_reply(message, text="Drugi raz nie dodaję!")
         return
     await send_reply(message, text=f"Fortunka {identifier} dodana!")
