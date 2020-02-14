@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import lru_cache, wraps
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from fuzzywuzzy import process
 
@@ -16,7 +16,7 @@ def add_command(
     description: str,
     group: Optional[str] = None,
     safe_to_fix: bool = True,
-    aliases: list = [],
+    aliases: Optional[List[str]] = None,
 ):
     """
     Add a new !command to be used in chat messages.
@@ -29,6 +29,9 @@ def add_command(
            fuzzy matching
     :param aliases: additional keywords, not listed in the help message
     """
+
+    if aliases is None:
+        aliases = []
 
     def decorator(function):
         @wraps(function)
