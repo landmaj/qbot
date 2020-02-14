@@ -1,6 +1,6 @@
-async-asgi-testclient==1.0.3
+async-asgi-testclient==1.4.3
 asynctest==0.13.0
-ipython==7.11.0
-pip-tools==4.3.0
+ipython==7.12.0
+pip-tools==4.4.1
 pytest-asyncio==0.10.0
-pytest==5.1.2
+pytest==5.3.5
