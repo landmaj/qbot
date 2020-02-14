@@ -2,12 +2,16 @@ import logging
 
 from bs4 import BeautifulSoup
 
+from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import feels, nosacze
-from qbot.slack.command import add_command
-from qbot.slack.db_utils import add_urls, query_with_recently_seen
-from qbot.slack.message import Image, IncomingMessage, send_reply
-from qbot.utils import add_recently_seen
+from qbot.db import (
+    add_recently_seen,
+    add_urls,
+    feels,
+    nosacze,
+    query_with_recently_seen,
+)
+from qbot.message import Image, IncomingMessage, send_reply
 
 logger = logging.getLogger(__name__)
 

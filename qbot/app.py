@@ -9,8 +9,8 @@ from starlette.responses import PlainTextResponse
 from starlette.routing import Route
 
 from qbot.core import registry
-from qbot.slack.event import process_slack_event
-from qbot.slack.utils import verify_signature
+from qbot.event import process_slack_event
+from qbot.utils import verify_signature
 
 
 class Index(HTTPEndpoint):
@@ -43,6 +43,7 @@ app = Starlette(
 @app.on_event("startup")
 async def setup_registry():
     await registry.setup()
+    import qbot.plugins  # noqa
 
 
 @app.on_event("shutdown")

@@ -1,11 +1,9 @@
 from asyncpg import UniqueViolationError
 
+from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import fortunki
-from qbot.slack.command import add_command
-from qbot.slack.db_utils import query_with_recently_seen
-from qbot.slack.message import IncomingMessage, TextWithButton, send_reply
-from qbot.utils import add_recently_seen
+from qbot.db import add_recently_seen, fortunki, query_with_recently_seen
+from qbot.message import IncomingMessage, TextWithButton, send_reply
 
 
 @add_command(

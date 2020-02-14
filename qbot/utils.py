@@ -1,12 +1,13 @@
+import hashlib
+import hmac
 from pathlib import Path
-from typing import Set
 
-from sqlalchemy import Table, func, select
+from starlette.requests import Request
 
 from qbot.core import registry
 
 
-def import_all_modules(directory: Path):
+def all_modules_in_directory(directory: Path):
     return [
         f.stem
         for f in directory.glob("**/*.py")
@@ -14,29 +15,23 @@ def import_all_modules(directory: Path):
     ]
 
 
-async def get_recently_seen(table: Table) -> Set[int]:
-    if not hasattr(table, "cache"):
-        table.cache = set()
-    return table.cache
+def calculate_signature(timestamp, body):
+    req = str.encode("v0:" + str(timestamp) + ":") + body
+    return (
+        "v0="
+        + hmac.new(
+            str.encode(str(registry.SIGNING_SECRET)), req, hashlib.sha256
+        ).hexdigest()
+    )
 
 
-async def add_recently_seen(table: Table, value: int) -> None:
-    if not hasattr(table, "max_cache_size"):
-        await set_max_cache_size(table)
-    if len(await get_recently_seen(table)) >= table.max_cache_size != 0:
-        await set_max_cache_size(table)
-        table.cache = {value}
-    elif table.max_cache_size != 0:
-        table.cache.add(value)
+async def verify_signature(request: Request):
+    """
+    Verify the signature of the request sent from Slack with a signature
+    calculated from the app's signing secret and request data.
+    """
 
-
-async def set_max_cache_size(table: Table):
-    cnt = await count(table)
-    if cnt == 0:
-        table.max_cache_size = 0
-    else:
-        table.max_cache_size = cnt - 1
-
-
-async def count(table: Table) -> int:
-    return await registry.database.fetch_val(select([func.count()]).select_from(table))
+    timestamp = request.headers["X-Slack-Request-Timestamp"]
+    signature = request.headers["X-Slack-Signature"]
+    body = await request.body()
+    return hmac.compare_digest(calculate_signature(timestamp, body), signature)

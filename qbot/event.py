@@ -1,7 +1,7 @@
 from functools import wraps
 
-from qbot.slack.command import ALIASES, COMMANDS, fuzzy_match
-from qbot.slack.message import IncomingMessage, send_reply
+from qbot.command import ALIASES, COMMANDS, fuzzy_match
+from qbot.message import IncomingMessage, send_reply
 
 EVENTS = {}
 

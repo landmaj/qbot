@@ -3,7 +3,7 @@ from time import time
 
 from async_asgi_testclient import TestClient
 
-from qbot.slack.utils import calculate_signature
+from qbot.utils import calculate_signature
 
 
 async def send_slack_request(event: dict, client: TestClient):

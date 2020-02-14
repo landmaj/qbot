@@ -1,15 +1,15 @@
 import logging
 import re
 
-from qbot.slack.command import add_command
-from qbot.slack.message import (
+from qbot.command import add_command
+from qbot.message import (
     IncomingMessage,
     OutgoingMessage,
     Text,
     send_message,
     send_reply,
 )
-from qbot.slack.plugin_excuse import excuse_command
+from qbot.plugins.excuse import excuse_command
 
 logger = logging.getLogger(__name__)
 CHANNEL_REGEX = re.compile(r"^<#(?P<channel_id>\w*)\|(?P<channel_name>\w*)>\s")

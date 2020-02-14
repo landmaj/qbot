@@ -1,7 +1,7 @@
 import random
 
-from qbot.slack.command import add_command
-from qbot.slack.message import IncomingMessage, send_reply
+from qbot.command import add_command
+from qbot.message import IncomingMessage, send_reply
 
 # Original author: Simon Travaglia
 # Polish translation: Andrzej 'Greybrow' Korcala

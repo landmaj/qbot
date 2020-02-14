@@ -25,7 +25,7 @@ async def test_command(client, message_text):
         "event_id": "Ev9UQ52YNA",
         "event_time": 1234567890,
     }
-    with patch("qbot.slack.message.send_message", new=CoroutineMock()) as mock:
+    with patch("qbot.message.send_message", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once()
     assert response.status_code == 200
