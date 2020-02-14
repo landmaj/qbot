@@ -2,7 +2,7 @@ from random import random
 
 from qbot.command import DESCRIPTIONS, add_command
 from qbot.core import registry
-from qbot.db import count, feels, fortunki, nosacze
+from qbot.db import count, fortunki, nosacze
 from qbot.message import IncomingMessage, send_reply
 
 
@@ -35,8 +35,7 @@ async def top_command(message: IncomingMessage):
         f"*Uptime:* {uptime}\n"
         f"*Repository:* https://github.com/landmaj/qbot\n"
         f"*Fortunki:* {await count(fortunki)}\n"
-        f"*Nosacze:* {await count(nosacze)}\n"
-        f"*Smutne nosacze:* {await count(feels)}"
+        f"*Nosacze:* {await count(nosacze)}"
     )
     await send_reply(message, text=text)
 

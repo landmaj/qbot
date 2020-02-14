@@ -4,13 +4,7 @@ from bs4 import BeautifulSoup
 
 from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import (
-    add_recently_seen,
-    add_urls,
-    feels,
-    nosacze,
-    query_with_recently_seen,
-)
+from qbot.db import add_recently_seen, add_urls, nosacze, query_with_recently_seen
 from qbot.message import Image, IncomingMessage, send_reply
 from qbot.plugins.excuse import bot_malfunction
 
@@ -84,32 +78,4 @@ async def nosacz(message: IncomingMessage):
 )
 async def nosacz_dodaj(message: IncomingMessage):
     text = await add_urls(nosacze, message.text)
-    await send_reply(message, text=text)
-
-
-@add_command("feel", "`!feel [-- ID]`", group="nosacze")
-async def feel(message: IncomingMessage):
-    identifier = None
-    if message.text:
-        try:
-            identifier = int(message.text)
-        except ValueError:
-            await send_reply(message, text="Niepoprawne ID.")
-            return
-    result = await query_with_recently_seen(feels, identifier)
-    if result is None:
-        await send_reply(message, text="O cokolwiek prosiłeś - nie istnieje.")
-        return
-    await send_reply(message, blocks=[Image(result["url"], "smutny nosacz")])
-    await add_recently_seen(feels, result["id"])
-
-
-@add_command(
-    "feel dodaj",
-    "`!feel dodaj -- https://example.com/image.jpg`",
-    group="nosacze",
-    safe_to_fix=False,
-)
-async def feel_dodaj(message: IncomingMessage):
-    text = await add_urls(feels, message.text)
     await send_reply(message, text=text)
