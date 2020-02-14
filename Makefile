@@ -5,7 +5,7 @@ destroy:
 	-docker container stop pg_qbot
 
 venv:
-	-python3.7 -m venv .venv
+	-python3.8 -m venv .venv
 	$(CMD) pip install pip-tools
 
 sync_requirements:
