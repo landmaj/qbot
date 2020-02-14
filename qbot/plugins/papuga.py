@@ -22,6 +22,9 @@ CHANNEL_REGEX = re.compile(r"^<#(?P<channel_id>\w*)\|(?P<channel_name>\w*)>\s")
     safe_to_fix=False,
 )
 async def parrot_command(message: IncomingMessage) -> None:
+    if message.channel_name != "im":
+        await send_reply(message, text="napisz na priv")
+        return
     if message.text:
         match = CHANNEL_REGEX.search(message.text)
         if match is None:
