@@ -1,3 +1,5 @@
+from random import random
+
 from qbot.command import DESCRIPTIONS, add_command
 from qbot.core import registry
 from qbot.db import count, feels, fortunki, nosacze
@@ -6,7 +8,10 @@ from qbot.message import IncomingMessage, send_reply
 
 @add_command("ping", "dig it!")
 async def ping_command(message: IncomingMessage) -> None:
-    await send_reply(message, text="Pong!")
+    if random() <= 0.1:
+        await send_reply(message, text=":ok_hand:")
+    else:
+        await send_reply(message, text="Pong!")
 
 
 @add_command("help", "pokaż tę wiadomość i wyjdź")
