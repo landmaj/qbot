@@ -14,7 +14,7 @@ async def ping_command(message: IncomingMessage) -> None:
         await send_reply(message, text="Pong!")
 
 
-@add_command("help", "pokaż tę wiadomość i wyjdź")
+@add_command("help", "pokaż tę wiadomość i wyjdź", aliases=["pomoc"])
 async def help_command(message: IncomingMessage) -> None:
     text = ""
     for group, commands in DESCRIPTIONS.items():
