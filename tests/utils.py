@@ -11,7 +11,7 @@ async def send_slack_request(event: dict, client: TestClient):
     data = json.dumps(event).encode("utf-8")
     signature = calculate_signature(timestamp, data)
     return await client.post(
-        "/slack",
+        "/",
         headers={
             "X-Slack-Request-Timestamp": str(timestamp),
             "X-Slack-Signature": signature,
