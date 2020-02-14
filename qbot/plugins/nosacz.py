@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @add_command(
     "janusz",
     "losowe memiszcze z janusznosacz.pl",
-    group="spam",
+    channel="fortunki",
     aliases=["j", "janush"],
 )
 async def janusz(message: IncomingMessage):
@@ -53,7 +53,7 @@ async def janusz(message: IncomingMessage):
     await send_reply(message, blocks=[Image(image_url, alt_text)])
 
 
-@add_command("nosacz", "`!nosacz [-- ID]`", group="spam", aliases=["n", "no"])
+@add_command("nosacz", "`!nosacz [-- ID]`", channel="fortunki", aliases=["n", "no"])
 async def nosacz(message: IncomingMessage):
     identifier = None
     if message.text:
@@ -73,7 +73,7 @@ async def nosacz(message: IncomingMessage):
 @add_command(
     "nosacz dodaj",
     "`!nosacz dodaj -- https://example.com/image.jpg`",
-    group="spam",
+    channel="fortunki",
     safe_to_fix=False,
 )
 async def nosacz_dodaj(message: IncomingMessage):

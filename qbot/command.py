@@ -1,3 +1,4 @@
+import asyncio
 from collections import defaultdict
 from functools import lru_cache, wraps
 from typing import List, Optional, Tuple
@@ -14,7 +15,7 @@ DESCRIPTIONS = defaultdict(lambda: defaultdict())
 def add_command(
     keyword: str,
     description: str,
-    group: Optional[str] = None,
+    channel: Optional[str] = None,
     safe_to_fix: bool = True,
     aliases: Optional[List[str]] = None,
 ):
@@ -23,7 +24,7 @@ def add_command(
 
     :param keyword: to trigger the command
     :param description: text to show in the help message
-    :param group: bundles commands together in the help message, defaults
+    :param channel: bundles commands together in the help message, defaults
            to miscellaneous
     :param safe_to_fix: whether command can be automatically called after
            fuzzy matching
@@ -36,12 +37,20 @@ def add_command(
     def decorator(function):
         @wraps(function)
         def wrapper(message: IncomingMessage):
+            if (
+                wrapper.channel
+                and message.channel_name
+                and message.channel_name != "im"
+                and wrapper.channel != message.channel_name
+            ):
+                return asyncio.sleep(0)
             return function(message)
 
+        wrapper.channel = channel
         COMMANDS[keyword] = wrapper
         for alias in aliases:
             ALIASES[alias] = wrapper
-        DESCRIPTIONS[group][keyword] = description
+        DESCRIPTIONS[channel][keyword] = description
         wrapper.safe_to_fix = safe_to_fix
 
         return wrapper

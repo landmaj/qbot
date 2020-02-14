@@ -8,7 +8,7 @@ from tests.utils import send_slack_request
 
 @pytest.mark.parametrize("message_text", ["!ping", "!help", "!uptime", "!top"])
 @pytest.mark.asyncio
-async def test_command(client, message_text):
+async def test_command(aresponses, client, message_text):
     event = {
         "token": "z26uFbvR1xHJEdHE1OQiO6t8",
         "team_id": "T061EG9RZ",
@@ -25,6 +25,12 @@ async def test_command(client, message_text):
         "event_id": "Ev9UQ52YNA",
         "event_time": 1234567890,
     }
+    aresponses.add(
+        "slack.com",
+        "/api/conversations.info",
+        "get",
+        aresponses.Response(text="error", status=401),
+    )
     with patch("qbot.message.send_message", new=CoroutineMock()) as mock:
         response = await send_slack_request(event, client)
         mock.assert_called_once()

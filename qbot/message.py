@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from typing import List, Optional
 from urllib.parse import urljoin
 
+from qbot.consts import SLACK_URL
 from qbot.core import registry
 
-SLACK_URL = "https://slack.com/api/"
 logger = logging.getLogger(__name__)
 
 
@@ -49,6 +49,7 @@ async def send_reply(
 @dataclass()
 class IncomingMessage:
     channel: str
+    channel_name: Optional[str]
     user: str
     text: str
     ts: str

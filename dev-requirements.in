@@ -1,3 +1,4 @@
+aresponses==1.1.2
 async-asgi-testclient==1.4.3
 asynctest==0.13.0
 ipython==7.12.0

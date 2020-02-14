@@ -2,6 +2,7 @@ from functools import wraps
 
 from qbot.command import ALIASES, COMMANDS, fuzzy_match
 from qbot.message import IncomingMessage, send_reply
+from qbot.utils import get_channel_name
 
 EVENTS = {}
 
@@ -28,8 +29,10 @@ async def process_slack_event(event: dict, event_id: str):
 
 @add_event("message")
 async def message_handler(event: dict):
+    channel_name = await get_channel_name(event["channel"])
     message = IncomingMessage(
         channel=event["channel"],
+        channel_name=channel_name,
         user=event.get("user", "BOT"),
         text=event.get("text", ""),
         ts=event["ts"],

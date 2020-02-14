@@ -1,10 +1,17 @@
 import hashlib
 import hmac
+import logging
 from pathlib import Path
+from typing import Optional
+from urllib.parse import urljoin
 
+from async_lru import alru_cache
 from starlette.requests import Request
 
+from qbot.consts import SLACK_URL
 from qbot.core import registry
+
+logger = logging.getLogger(__name__)
 
 
 def all_modules_in_directory(directory: Path):
@@ -35,3 +42,24 @@ async def verify_signature(request: Request):
     signature = request.headers["X-Slack-Signature"]
     body = await request.body()
     return hmac.compare_digest(calculate_signature(timestamp, body), signature)
+
+
+@alru_cache()
+async def get_channel_name(channel_id: str) -> Optional[str]:
+    async with registry.http_session.get(
+        url=urljoin(SLACK_URL, "conversations.info"),
+        params={"channel": channel_id},
+        headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
+    ) as resp:
+        if not 200 <= resp.status < 400:
+            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+            return
+        body = await resp.json()
+        if not body["ok"]:
+            error = body["error"]
+            logger.error(f"Slack returned an error: {error}.")
+            return
+        if body["channel"]["is_im"]:
+            return "im"
+        elif body["channel"]["is_channel"]:
+            return body["channel"]["name"]

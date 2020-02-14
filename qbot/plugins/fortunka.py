@@ -6,7 +6,9 @@ from qbot.db import add_recently_seen, fortunki, query_with_recently_seen
 from qbot.message import IncomingMessage, TextWithButton, send_reply
 
 
-@add_command("fortunka", "`!fortunka [-- ID]`", group="spam", aliases=["f", "funia"])
+@add_command(
+    "fortunka", "`!fortunka [-- ID]`", channel="fortunki", aliases=["f", "funia"]
+)
 async def fortunka_cmd(message: IncomingMessage):
     identifier = None
     if message.text:
@@ -29,7 +31,7 @@ async def fortunka_cmd(message: IncomingMessage):
 
 
 @add_command(
-    "fortunka dodaj", "`!fortunka dodaj -- TEXT`", group="spam", safe_to_fix=False
+    "fortunka dodaj", "`!fortunka dodaj -- TEXT`", channel="fortunki", safe_to_fix=False
 )
 async def fortunka_dodaj(message: IncomingMessage):
     if not message.text:
