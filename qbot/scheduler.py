@@ -1,10 +1,12 @@
 import asyncio
+import logging
 from functools import wraps
 from time import time
 
 from qbot.core import registry
 
 _JOBS = {}
+logger = logging.getLogger(__name__)
 
 
 def job(timer: float):
@@ -27,6 +29,7 @@ def job(timer: float):
 
 async def _run_jobs():
     await registry.setup()
+    logger.info("Started scheduler process.")
     while True:
         tasks = []
         for func, next_run_on in _JOBS.items():

@@ -34,6 +34,7 @@ class AppMode:
 @click.option(f"--{AppMode.SERVER}", "mode", flag_value=AppMode.SERVER)
 @click.option(f"--{AppMode.SCHEDULER}", "mode", flag_value=AppMode.SCHEDULER)
 def main(mode):
+    logging.info(f"Application startup mode: {mode}.")
     import qbot.plugins  # noqa
 
     if mode == AppMode.SERVER:
