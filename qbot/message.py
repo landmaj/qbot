@@ -12,20 +12,20 @@ logger = logging.getLogger(__name__)
 
 async def send_message(message: "OutgoingMessage") -> bool:
     data = message.to_dict()
-    async with registry.http_session.post(
+    resp = await registry.http_client.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
         json=data,
         headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
-    ) as resp:
-        if not 200 <= resp.status < 400:
-            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
-            return False
-        body = await resp.json()
-        if not body["ok"]:
-            error = body["error"]
-            logger.error(f"Slack returned an error: {error}. Request body: {data}.")
-            return False
-        return True
+    )
+    if not 200 <= resp.status_code < 400:
+        logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+        return False
+    body = resp.json()
+    if not body["ok"]:
+        error = body["error"]
+        logger.error(f"Slack returned an error: {error}. Request body: {data}.")
+        return False
+    return True
 
 
 async def send_reply(

@@ -46,20 +46,20 @@ async def verify_signature(request: Request):
 
 @alru_cache()
 async def get_channel_name(channel_id: str) -> Optional[str]:
-    async with registry.http_session.get(
+    resp = await registry.http_client.get(
         url=urljoin(SLACK_URL, "conversations.info"),
         params={"channel": channel_id},
         headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
-    ) as resp:
-        if not 200 <= resp.status < 400:
-            logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
-            return
-        body = await resp.json()
-        if not body["ok"]:
-            error = body["error"]
-            logger.error(f"Slack returned an error: {error}.")
-            return
-        if body["channel"]["is_im"]:
-            return "im"
-        elif body["channel"]["is_channel"]:
-            return body["channel"]["name"]
+    )
+    if not 200 <= resp.status_code < 400:
+        logger.error(f"Incorrect response from Slack. Status: {resp.status}.")
+        return
+    body = resp.json()
+    if not body["ok"]:
+        error = body["error"]
+        logger.error(f"Slack returned an error: {error}.")
+        return
+    if body["channel"]["is_im"]:
+        return "im"
+    elif body["channel"]["is_channel"]:
+        return body["channel"]["name"]

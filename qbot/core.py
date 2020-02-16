@@ -1,14 +1,17 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-import aiohttp
-import databases
+from databases import Database
+from httpx import AsyncClient
 from starlette.config import Config
 from starlette.datastructures import Secret
 
 
 # noinspection PyAttributeOutsideInit
 class Registry:
+    http_client: AsyncClient
+    database: Database
+
     def set_config_vars(self):
         config = Config(".env")
         self.REVISION = config("GIT_REV", default="N/A")
@@ -20,17 +23,15 @@ class Registry:
 
     async def setup(self):
         self.set_config_vars()
-        self.http_session = aiohttp.ClientSession()
+        self.http_client = AsyncClient()
         if self.TESTING:
-            self.database = databases.Database(
-                registry.DATABASE_URL, force_rollback=True
-            )
+            self.database = Database(registry.DATABASE_URL, force_rollback=True)
         else:
-            self.database = databases.Database(registry.DATABASE_URL)
+            self.database = Database(registry.DATABASE_URL)
         await self.database.connect()
 
     async def teardown(self):
-        await self.http_session.close()
+        await self.http_client.aclose()
         await self.database.disconnect()
 
     @property

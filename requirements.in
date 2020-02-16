@@ -1,9 +1,9 @@
-aiohttp==3.6.2
 alembic==1.4.0
 async_lru==1.0.2
 beautifulsoup4==4.8.2
 databases[postgresql]==0.2.6
 fuzzywuzzy==0.18.0
+httpx==0.11.1
 psycopg2==2.8.4
 python-Levenshtein==0.12.0
 sentry-sdk==0.14.1

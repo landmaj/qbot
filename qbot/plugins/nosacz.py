@@ -19,20 +19,18 @@ logger = logging.getLogger(__name__)
 )
 async def janusz(message: IncomingMessage):
     while True:
-        async with registry.http_session.get(
-            "http://www.janusznosacz.pl/losuj"
-        ) as resp:
-            if not 200 <= resp.status < 400:
-                logger.error(
-                    f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
-                )
-                await bot_malfunction(message)
-                return
-            # random image sometimes returns an error and redirects to the home page
-            if resp.url.path == "/":
-                continue
-            body = await resp.text()
-            break
+        resp = await registry.http_client.get("http://www.janusznosacz.pl/losuj")
+        if not 200 <= resp.status_code < 400:
+            logger.error(
+                f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
+            )
+            await bot_malfunction(message)
+            return
+        # random image sometimes returns an error and redirects to the home page
+        if resp.url.path == "/":
+            continue
+        body = resp.text()
+        break
 
     soup = BeautifulSoup(body, "html.parser")
     try:
