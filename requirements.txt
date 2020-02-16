@@ -10,7 +10,7 @@ asyncpg==0.20.1           # via databases
 beautifulsoup4==4.8.2
 certifi==2019.11.28       # via httpx, sentry-sdk
 chardet==3.0.4            # via httpx
-click==7.0                # via uvicorn
+click==7.0
 databases[postgresql]==0.2.6
 decorator==4.4.1          # via validators
 fuzzywuzzy==0.18.0

@@ -1,2 +1,2 @@
 release: alembic upgrade head
-web: python run.py
+web: python run.py --server

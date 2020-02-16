@@ -28,7 +28,7 @@ compile_requirements:
 
 run:
 	$(CMD) alembic upgrade head
-	$(CMD) python run.py
+	$(CMD) python run.py --server
 
 format:
 	pre-commit run --all-files
