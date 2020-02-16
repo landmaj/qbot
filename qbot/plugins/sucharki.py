@@ -1,4 +1,5 @@
 import hashlib
+from urllib.parse import urljoin
 
 from asyncpg import UniqueViolationError
 
@@ -26,7 +27,10 @@ async def sucharek_cmd(message: IncomingMessage):
         message,
         blocks=[
             Image(
-                image_url=app.url_path_for("sucharek", sucharek_id=identifier),
+                image_url=urljoin(
+                    registry.ROOT_DOMAIN,
+                    app.url_path_for("sucharek", sucharek_id=identifier),
+                ),
                 alt_text="Psi Sucharek",
             )
         ],

@@ -17,6 +17,7 @@ class Registry:
         self.REVISION = config("GIT_REV", default="N/A")
         self.SIGNING_SECRET = config("Q_SIGNING_SECRET", cast=Secret)
         self.SLACK_TOKEN = config("Q_SLACK_TOKEN", cast=Secret)
+        self.ROOT_DOMAIN = config("Q_ROOT_DOMAIN")
         self.DATABASE_URL = config("DATABASE_URL", cast=Secret)
         self.TESTING = config("TESTING", cast=bool, default=False)
         self.DEPLOY_TIMESTAMP = config("DEPLOY_TIMESTAMP", cast=int, default=None)
