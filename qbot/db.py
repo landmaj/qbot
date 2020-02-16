@@ -2,7 +2,7 @@ from typing import Optional, Set
 
 import sqlalchemy
 import validators
-from sqlalchemy import Column, Integer, Table, Text, func, select
+from sqlalchemy import Column, Integer, LargeBinary, Table, Text, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from qbot.core import registry
@@ -28,6 +28,14 @@ fortunki = sqlalchemy.Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("text", Text, nullable=False, unique=True),
+)
+
+sucharki = sqlalchemy.Table(
+    "sucharki",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("image", LargeBinary, nullable=False),
+    Column("digest", LargeBinary, nullable=False, index=True, unique=True),
 )
 
 

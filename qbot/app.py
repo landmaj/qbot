@@ -5,19 +5,20 @@ from starlette.background import BackgroundTask
 from starlette.endpoints import HTTPEndpoint
 from starlette.middleware import Middleware
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse
+from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 
 from qbot.core import registry
+from qbot.db import sucharki
 from qbot.event import process_slack_event
 from qbot.utils import verify_signature
 
 
 class Index(HTTPEndpoint):
-    async def get(self, request: Request):
+    async def get(self, request: Request) -> Response:
         return PlainTextResponse("qbot")
 
-    async def post(self, request: Request):
+    async def post(self, request: Request) -> Response:
         try:
             if not await verify_signature(request):
                 return PlainTextResponse("Incorrect signature.", 403)
@@ -35,8 +36,19 @@ class Index(HTTPEndpoint):
         return PlainTextResponse("OK", background=task)
 
 
+async def sucharek(request: Request) -> Response:
+    sucharek_id = request.path_params["sucharek_id"]
+    result = await registry.database.fetch_one(
+        sucharki.select().where(sucharki.c.id == sucharek_id)
+    )
+    if result:
+        return Response(result["image"], 200, media_type="image/jpeg")
+    return Response("NOT FOUND", 404)
+
+
 app = Starlette(
-    routes=[Route("/", Index)], middleware=[Middleware(SentryAsgiMiddleware)]
+    routes=[Route("/", Index), Route("/sucharek/{sucharek_id:int}", sucharek)],
+    middleware=[Middleware(SentryAsgiMiddleware)],
 )
 
 

@@ -25,3 +25,10 @@ test:
 compile_requirements:
 	$(CMD) pip-compile requirements.in
 	$(CMD) pip-compile dev-requirements.in --output-file dev-requirements.txt
+
+run:
+	$(CMD) alembic upgrade head
+	$(CMD) python run.py
+
+format:
+	pre-commit run --all-files
