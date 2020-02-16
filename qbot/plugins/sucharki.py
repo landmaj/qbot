@@ -23,6 +23,7 @@ async def sucharek_cmd(message: IncomingMessage):
     if result is None:
         await send_reply(message, text="Źródełko sucharków jest suche.")
         return
+    identifier = result["id"]
     await send_reply(
         message,
         blocks=[
