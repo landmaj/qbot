@@ -55,7 +55,6 @@ app = Starlette(
 @app.on_event("startup")
 async def setup_registry():
     await registry.setup()
-    import qbot.plugins  # noqa
 
 
 @app.on_event("shutdown")

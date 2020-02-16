@@ -34,6 +34,8 @@ class AppMode:
 @click.option(f"--{AppMode.SERVER}", "mode", flag_value=AppMode.SERVER)
 @click.option(f"--{AppMode.SCHEDULER}", "mode", flag_value=AppMode.SCHEDULER)
 def main(mode):
+    import qbot.plugins  # noqa
+
     if mode == AppMode.SERVER:
         uvicorn.run(app, host=HOST, port=int(PORT))
     elif mode == AppMode.SCHEDULER:
