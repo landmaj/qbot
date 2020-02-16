@@ -29,7 +29,7 @@ async def janusz(message: IncomingMessage):
         # random image sometimes returns an error and redirects to the home page
         if resp.url.path == "/":
             continue
-        body = resp.text()
+        body = resp.text
         break
 
     soup = BeautifulSoup(body, "html.parser")
