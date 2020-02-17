@@ -2,12 +2,14 @@ import hashlib
 from urllib.parse import urljoin
 
 from asyncpg import UniqueViolationError
+from vendor import facebook_scraper
 
 from qbot.app import app
 from qbot.command import add_command
 from qbot.core import registry
 from qbot.db import add_recently_seen, query_with_recently_seen, sucharki
 from qbot.message import Image, IncomingMessage, send_reply
+from qbot.scheduler import job
 
 
 @add_command("sucharek", "`!sucharek [-- ID]`", channel="fortunki", aliases=["s"])
@@ -53,3 +55,10 @@ async def add_sucharek(image: bytes) -> int:
             sucharki.select().where(sucharki.c.digest == sha256.digest())
         )
         return result["id"]
+
+
+@job(3600)
+async def get_latest():
+    for post in facebook_scraper.get_posts("psiesucharki", pages=1):
+        print(post["post_id"])
+        print(post["image"])
