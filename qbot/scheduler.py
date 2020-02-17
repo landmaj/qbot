@@ -17,6 +17,7 @@ def job(timer: float):
     def decorator(function):
         @wraps(function)
         async def wrapper():
+            logger.info(f"Running job: '{function.__module__}.{function.__name__}'.")
             try:
                 return await function()
             except Exception:
