@@ -1,9 +1,8 @@
-from sentry_sdk import capture_exception
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+import logging
+
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.endpoints import HTTPEndpoint
-from starlette.middleware import Middleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
@@ -22,8 +21,8 @@ class Index(HTTPEndpoint):
         try:
             if not await verify_signature(request):
                 return PlainTextResponse("Incorrect signature.", 403)
-        except Exception as exc:
-            capture_exception(exc)
+        except Exception:
+            logging.exception("Could not verify signature.")
             return PlainTextResponse("Could not verify signature.", 400)
 
         data = await request.json()
@@ -47,8 +46,7 @@ async def sucharek(request: Request) -> Response:
 
 
 app = Starlette(
-    routes=[Route("/", Index), Route("/sucharek/{sucharek_id:int}", sucharek)],
-    middleware=[Middleware(SentryAsgiMiddleware)],
+    routes=[Route("/", Index), Route("/sucharek/{sucharek_id:int}", sucharek)]
 )
 
 
