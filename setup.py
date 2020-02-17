@@ -1,9 +1,9 @@
 from setuptools import find_packages, setup
 
-with open("requirements.in") as f:
+with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
-with open("dev-requirements.in") as f:
+with open("dev-requirements.txt") as f:
     dev_requirements = f.read().splitlines()
 
 setup(
