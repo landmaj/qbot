@@ -3,14 +3,12 @@ import itertools
 import json
 import re
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from urllib import parse as urlparse
 
 from requests import RequestException
-from requests_html import HTML, HTMLSession
-
-__all__ = ["get_posts"]
-
+from requests_html import HTML, AsyncHTMLSession
 
 _base_url = "https://m.facebook.com"
 _user_agent = (
@@ -28,9 +26,6 @@ _headers = {
 _session = None
 _timeout = None
 
-_likes_regex = re.compile(r"like_def[^>]*>([0-9,.]+)")
-_comments_regex = re.compile(r"cmt_def[^>]*>([0-9,.]+)")
-_shares_regex = re.compile(r"([0-9,.]+)\s+Shares", re.IGNORECASE)
 _link_regex = re.compile(r"href=\"https:\/\/lm\.facebook\.com\/l\.php\?u=(.+?)\&amp;h=")
 
 _cursor_regex = re.compile(r'href:"(/page_content[^"]+)"')  # First request
@@ -45,23 +40,35 @@ _image_regex_lq = re.compile(r"background-image: url\('(.+)'\)")
 _post_url_regex = re.compile(r"/story.php\?story_fbid=")
 
 
-def get_posts(path, pages=10, timeout=5, sleep=0, credentials=None):
-    """Gets posts for a given account."""
+@dataclass
+class Post:
+    id: int
+    text: str
+    post_text: str
+    shared_text: str
+    time: datetime
+    image: str
+    post_url: str
+    link: str
+
+
+async def get_posts(path, pages=10, timeout=5, sleep=0):
+    """Get posts for a given page"""
     global _session, _timeout
 
     url = f"{_base_url}/{path}/posts/"
 
-    _session = HTMLSession()
+    _session = AsyncHTMLSession()
     _session.headers.update(_headers)
 
     _timeout = timeout
-    response = _session.get(url, timeout=_timeout)
+    response = await _session.get(url, timeout=_timeout)
     html = HTML(html=response.html.html.replace("<!--", "").replace("-->", ""))
     cursor_blob = html.html
 
     while True:
         for article in html.find("article"):
-            yield _extract_post(article)
+            yield await _extract_post(article)
 
         pages -= 1
         if pages == 0:
@@ -74,7 +81,7 @@ def get_posts(path, pages=10, timeout=5, sleep=0, credentials=None):
             time.sleep(sleep)
 
         try:
-            response = _session.get(next_url, timeout=timeout)
+            response = await _session.get(next_url, timeout=timeout)
             response.raise_for_status()
             data = json.loads(response.text.replace("for (;;);", "", 1))
         except (RequestException, ValueError):
@@ -87,22 +94,18 @@ def get_posts(path, pages=10, timeout=5, sleep=0, credentials=None):
                 cursor_blob = action["code"]
 
 
-def _extract_post(article):
+async def _extract_post(article):
     text, post_text, shared_text = _extract_text(article)
-    return {
-        "post_id": _extract_post_id(article),
-        "text": text,
-        "post_text": post_text,
-        "shared_text": shared_text,
-        "time": _extract_time(article),
-        "image": _extract_image(article),
-        "likes": _find_and_search(article, "footer", _likes_regex, _parse_int) or 0,
-        "comments": _find_and_search(article, "footer", _comments_regex, _parse_int)
-        or 0,
-        "shares": _find_and_search(article, "footer", _shares_regex, _parse_int) or 0,
-        "post_url": _extract_post_url(article),
-        "link": _extract_link(article),
-    }
+    return Post(
+        id=_extract_post_id(article),
+        text=text,
+        post_text=post_text,
+        shared_text=shared_text,
+        time=_extract_time(article),
+        image=await _extract_image(article),
+        post_url=_extract_post_url(article),
+        link=_extract_link(article),
+    )
 
 
 def _extract_post_id(article):
@@ -152,14 +155,14 @@ def _extract_time(article):
     return None
 
 
-def _extract_photo_link(article):
+async def _extract_photo_link(article):
     match = _photo_link.search(article.html)
     if not match:
         return None
 
     url = f"{_base_url}{match.groups()[0]}"
 
-    response = _session.get(url, timeout=_timeout)
+    response = await _session.get(url, timeout=_timeout)
     html = response.html.html
     match = _image_regex.search(html)
     if match:
@@ -167,8 +170,8 @@ def _extract_photo_link(article):
     return None
 
 
-def _extract_image(article):
-    image_link = _extract_photo_link(article)
+async def _extract_image(article):
+    image_link = await _extract_photo_link(article)
     if image_link is not None:
         return image_link
     return _extract_image_lq(article)
@@ -213,12 +216,6 @@ def _extract_post_url(article):
             return f"{_base_url}{path}"
 
     return None
-
-
-def _find_and_search(article, selector, pattern, cast=str):
-    container = article.find(selector, first=True)
-    match = container and pattern.search(container.html)
-    return match and cast(match.groups()[0])
 
 
 def _find_cursor(text):

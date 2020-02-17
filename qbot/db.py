@@ -36,6 +36,7 @@ sucharki = sqlalchemy.Table(
     Column("id", Integer, primary_key=True),
     Column("image", LargeBinary, nullable=False),
     Column("digest", LargeBinary, nullable=False, index=True, unique=True),
+    Column("post_id", Text, nullable=True, index=True, unique=True),
 )
 
 

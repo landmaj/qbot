@@ -16,8 +16,13 @@ def job(timer: float):
 
     def decorator(function):
         @wraps(function)
-        def wrapper():
-            return function()
+        async def wrapper():
+            try:
+                return await function()
+            except Exception:
+                logger.exception(
+                    f"Job '{function.__module__}.{function.__name__}' failed!"
+                )
 
         wrapper.timer = timer
         _JOBS[wrapper] = time()
