@@ -46,7 +46,7 @@ async def random_sucharek(request: Request) -> Response:
             200,
             media_type="image/jpeg",
             headers={
-                "Content-Disposition": f"attachment;filename=\"sucharek_{result['id']}.jpg\""
+                "Content-Disposition": f"inline;filename=\"sucharek_{result['id']}.jpg\""
             },
         )
     return Response("SUCHO!", 404)
@@ -63,7 +63,7 @@ async def sucharek(request: Request) -> Response:
             200,
             media_type="image/jpeg",
             headers={
-                "Content-Disposition": f"attachment;filename=\"sucharek_{result['id']}.jpg\""
+                "Content-Disposition": f"inline;filename=\"sucharek_{result['id']}.jpg\""
             },
         )
     return Response("NOT FOUND", 404)
