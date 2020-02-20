@@ -41,7 +41,14 @@ async def random_sucharek(request: Request) -> Response:
         sucharki.select().order_by(func.random()).limit(1)
     )
     if result:
-        return Response(result["image"], 200, media_type="image/jpeg")
+        return Response(
+            result["image"],
+            200,
+            media_type="image/jpeg",
+            headers={
+                "Content-Disposition": f"attachment;filename=\"sucharek_{result['id']}.jpg\""
+            },
+        )
     return Response("SUCHO!", 404)
 
 
@@ -51,7 +58,14 @@ async def sucharek(request: Request) -> Response:
         sucharki.select().where(sucharki.c.id == sucharek_id)
     )
     if result:
-        return Response(result["image"], 200, media_type="image/jpeg")
+        return Response(
+            result["image"],
+            200,
+            media_type="image/jpeg",
+            headers={
+                "Content-Disposition": f"attachment;filename=\"sucharek_{result['id']}.jpg\""
+            },
+        )
     return Response("NOT FOUND", 404)
 
 
