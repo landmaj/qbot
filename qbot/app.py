@@ -1,5 +1,6 @@
 import logging
 
+from sqlalchemy.sql.expression import func
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.endpoints import HTTPEndpoint
@@ -35,6 +36,15 @@ class Index(HTTPEndpoint):
         return PlainTextResponse("OK", background=task)
 
 
+async def random_sucharek(request: Request) -> Response:
+    result = await registry.database.fetch_one(
+        sucharki.select().order_by(func.random()).limit(1)
+    )
+    if result:
+        return Response(result["image"], 200, media_type="image/jpeg")
+    return Response("SUCHO!", 404)
+
+
 async def sucharek(request: Request) -> Response:
     sucharek_id = request.path_params["sucharek_id"]
     result = await registry.database.fetch_one(
@@ -46,7 +56,11 @@ async def sucharek(request: Request) -> Response:
 
 
 app = Starlette(
-    routes=[Route("/", Index), Route("/sucharek/{sucharek_id:int}", sucharek)]
+    routes=[
+        Route("/", Index),
+        Route("/sucharek", random_sucharek),
+        Route("/sucharek/{sucharek_id:int}", sucharek),
+    ]
 )
 
 
