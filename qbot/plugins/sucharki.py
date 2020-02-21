@@ -60,11 +60,11 @@ async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> str:
     return download_url
 
 
-@job(3600)
+@job(300)
 async def get_latest():
     current_time = datetime.utcnow()
     async for post in facebook_scraper.get_posts("psiesucharki", pages=1):
-        if current_time - timedelta(hours=24) < post.time and post.image:
+        if current_time - timedelta(hours=1) < post.time and post.image:
             result = await registry.database.fetch_one(
                 b2_images.select().where(
                     (b2_images.c.plugin == PLUGIN_NAME) & (b2_images.c.extra == post.id)
@@ -95,12 +95,10 @@ async def get_latest():
             )
 
 
-@job(100000000000000000)
+@job()
 async def upload_existing():
     counter = 0
-    images = await registry.database.fetch_all(
-        b2_images.select().where(b2_images.c.plugin == PLUGIN_NAME)
-    )
+    images = await registry.database.fetch_all(sucharki.select())
     for img in images:
         counter += 1
         logger.info(f"Uploading: {counter}")

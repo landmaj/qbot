@@ -2,6 +2,7 @@ import asyncio
 import logging
 from functools import wraps
 from time import time
+from typing import Optional
 
 from qbot.core import registry
 
@@ -9,7 +10,7 @@ _JOBS = {}
 logger = logging.getLogger(__name__)
 
 
-def job(timer: float):
+def job(timer: Optional[float] = None):
     """
     Bieda-cron.
     """
@@ -47,7 +48,8 @@ async def _run_jobs():
             current_time = time()
             if current_time >= next_run_on:
                 tasks.append(func())
-                _JOBS[func] = current_time + func.timer
+                if func.timer is not None:
+                    _JOBS[func] = current_time + func.timer
         await asyncio.gather(*tasks)
         await asyncio.sleep(0.1)
 
