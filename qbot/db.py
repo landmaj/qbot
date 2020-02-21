@@ -114,5 +114,5 @@ async def b2_images_count(plugin: str) -> int:
     return await registry.database.fetch_val(
         select([func.count()])
         .select_from(b2_images)
-        .where(b2_images.c.plugin == plugin)
+        .where((b2_images.c.plugin == plugin) & b2_images.c.deletd == False)
     )

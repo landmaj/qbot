@@ -26,7 +26,9 @@ PLUGIN_NAME = "sucharki"
 @add_command("sucharek", "Psie Sucharki", channel="fortunki", aliases=["s"])
 async def sucharek_cmd(message: IncomingMessage):
     result = await registry.database.fetch_one(
-        b2_images.select().order_by(func.random())
+        b2_images.select()
+        .order_by(func.random())
+        .where((b2_images.c.plugin == PLUGIN_NAME) & (b2_images.c.deleted == False))
     )
     if result is None:
         await send_reply(message, text="Źródełko sucharków jest suche.")
