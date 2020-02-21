@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Optional
-from uuid import uuid4
 
 from sqlalchemy import func
 from vendor import facebook_scraper
@@ -38,25 +37,18 @@ async def sucharek_cmd(message: IncomingMessage):
 
 
 async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> str:
-    b2_image = upload_image(
-        content=image,
-        base_name=f"sucharek_{uuid4()}",
-        plugin=PLUGIN_NAME,
-        bucket=registry.b3,
-    )
-    download_url = registry.b3.get_download_url(b2_image.file_name)
+    b2_image = upload_image(content=image, plugin=PLUGIN_NAME, bucket=registry.b3)
     await registry.database.execute(
         query=b2_images.insert(),
         values={
             "plugin": PLUGIN_NAME,
             "extra": post_id,
-            "external_id": b2_image.external_id,
             "file_name": b2_image.file_name,
             "hash": b2_image.hash,
-            "url": download_url,
+            "url": b2_image.url,
         },
     )
-    return download_url
+    return b2_image.url
 
 
 @job(300)

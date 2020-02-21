@@ -37,7 +37,6 @@ b2_images = sqlalchemy.Table(
     Column("plugin", Text, nullable=False, index=True),
     Column("extra", Text, nullable=True, index=True),
     Column("deleted", Boolean, default=False, index=True),
-    Column("external_id", Text, unique=True, nullable=False),
     Column("file_name", Text, unique=True, nullable=False),
     Column("hash", Text, unique=True, nullable=False),
     Column("url", Text, unique=True, nullable=False),
