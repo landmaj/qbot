@@ -2,7 +2,7 @@ from typing import Optional, Set
 
 import sqlalchemy
 import validators
-from sqlalchemy import Boolean, Column, Integer, LargeBinary, Table, Text, func, select
+from sqlalchemy import Boolean, Column, Integer, Table, Text, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from qbot.core import registry
@@ -41,15 +41,6 @@ b2_images = sqlalchemy.Table(
     Column("file_name", Text, unique=True, nullable=False),
     Column("hash", Text, unique=True, nullable=False),
     Column("url", Text, unique=True, nullable=False),
-)
-
-sucharki = sqlalchemy.Table(
-    "sucharki",
-    metadata,
-    Column("id", Integer, primary_key=True),
-    Column("image", LargeBinary, nullable=False),
-    Column("digest", LargeBinary, nullable=False, index=True, unique=True),
-    Column("post_id", Text, nullable=True, index=True, unique=True),
 )
 
 

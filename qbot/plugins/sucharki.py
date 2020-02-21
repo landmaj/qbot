@@ -9,7 +9,7 @@ from vendor import facebook_scraper
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import add_recently_seen, b2_images, sucharki
+from qbot.db import b2_images
 from qbot.message import (
     Image,
     IncomingMessage,
@@ -35,7 +35,6 @@ async def sucharek_cmd(message: IncomingMessage):
     await send_reply(
         message, blocks=[Image(image_url=result["url"], alt_text="Psi Sucharek")]
     )
-    await add_recently_seen(sucharki, result["id"])
 
 
 async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> str:
@@ -93,13 +92,3 @@ async def get_latest():
                     ],
                 )
             )
-
-
-@job()
-async def upload_existing():
-    counter = 0
-    images = await registry.database.fetch_all(sucharki.select())
-    for img in images:
-        counter += 1
-        logger.info(f"Uploading: {counter}")
-        await add_sucharek(img["image"], img["post_id"])
