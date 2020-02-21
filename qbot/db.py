@@ -36,7 +36,7 @@ b2_images = sqlalchemy.Table(
     Column("id", Integer, primary_key=True),
     Column("plugin", Text, nullable=False, index=True),
     Column("extra", Text, nullable=True, index=True),
-    Column("deleted", Boolean, default=False, index=True),
+    Column("deleted", Boolean, server_default="false", nullable=False, index=True),
     Column("file_name", Text, unique=True, nullable=False),
     Column("hash", Text, unique=True, nullable=False),
     Column("url", Text, unique=True, nullable=False),
@@ -114,5 +114,5 @@ async def b2_images_count(plugin: str) -> int:
     return await registry.database.fetch_val(
         select([func.count()])
         .select_from(b2_images)
-        .where((b2_images.c.plugin == plugin) & b2_images.c.deletd == False)
+        .where((b2_images.c.plugin == plugin) & b2_images.c.deleted == False)
     )
