@@ -1,16 +1,15 @@
-import hashlib
 import logging
 from datetime import datetime, timedelta
 from typing import Optional
-from urllib.parse import urljoin
+from uuid import uuid4
 
-from asyncpg import UniqueViolationError
+from sqlalchemy import func
 from vendor import facebook_scraper
 
-from qbot.app import app
+from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import add_recently_seen, query_with_recently_seen, sucharki
+from qbot.db import add_recently_seen, b2_images, sucharki
 from qbot.message import (
     Image,
     IncomingMessage,
@@ -22,51 +21,43 @@ from qbot.message import (
 from qbot.scheduler import job
 
 logger = logging.getLogger(__name__)
+PLUGIN_NAME = "sucharki"
 
 
-@add_command("sucharek", "`!sucharek [-- ID]`", channel="fortunki", aliases=["s"])
+@add_command("sucharek", "Psie Sucharki", channel="fortunki", aliases=["s"])
 async def sucharek_cmd(message: IncomingMessage):
-    identifier = None
-    if message.text:
-        try:
-            identifier = int(message.text)
-        except ValueError:
-            await send_reply(message, text="Niepoprawne ID.")
-            return
-    result = await query_with_recently_seen(sucharki, identifier)
+    result = await registry.database.fetch_one(
+        b2_images.select().order_by(func.random())
+    )
     if result is None:
         await send_reply(message, text="Źródełko sucharków jest suche.")
         return
-    identifier = result["id"]
     await send_reply(
-        message,
-        blocks=[
-            Image(
-                image_url=urljoin(
-                    registry.ROOT_DOMAIN,
-                    app.url_path_for("sucharek", sucharek_id=identifier),
-                ),
-                alt_text="Psi Sucharek",
-            )
-        ],
+        message, blocks=[Image(image_url=result["url"], alt_text="Psi Sucharek")]
     )
     await add_recently_seen(sucharki, result["id"])
 
 
-async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> int:
-    sha256 = hashlib.sha256()
-    sha256.update(image)
-    try:
-        async with registry.database.transaction():
-            return await registry.database.execute(
-                query=sucharki.insert(),
-                values={"image": image, "digest": sha256.digest(), "post_id": post_id},
-            )
-    except UniqueViolationError:
-        result = await registry.database.fetch_one(
-            sucharki.select().where(sucharki.c.digest == sha256.digest())
-        )
-        return result["id"]
+async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> str:
+    b2_image = upload_image(
+        content=image,
+        base_name=f"sucharek_{uuid4()}",
+        plugin=PLUGIN_NAME,
+        bucket=registry.b3,
+    )
+    download_url = registry.b3.get_download_url(b2_image.file_name)
+    await registry.database.execute(
+        query=b2_images.insert(),
+        values={
+            "plugin": PLUGIN_NAME,
+            "extra": post_id,
+            "external_id": b2_image.external_id,
+            "file_name": b2_image.file_name,
+            "hash": b2_image.hash,
+            "url": download_url,
+        },
+    )
+    return download_url
 
 
 @job(3600)
@@ -75,7 +66,9 @@ async def get_latest():
     async for post in facebook_scraper.get_posts("psiesucharki", pages=1):
         if current_time - timedelta(hours=24) < post.time and post.image:
             result = await registry.database.fetch_one(
-                sucharki.select().where(sucharki.c.post_id == post.id)
+                b2_images.select().where(
+                    (b2_images.c.plugin == PLUGIN_NAME) & (b2_images.c.extra == post.id)
+                )
             )
             if result is not None:
                 continue
@@ -89,20 +82,26 @@ async def get_latest():
                     f"Incorrect response from Facebook. Status: {resp.status}."
                 )
                 continue
-            identifier = await add_sucharek(resp.content, post.id)
+            download_url = await add_sucharek(resp.content, post.id)
             await send_message(
                 OutgoingMessage(
                     channel=registry.SPAM_CHANNEL_ID,
                     thread_ts=None,
                     blocks=[
                         Text("Nowy sucharek!"),
-                        Image(
-                            image_url=urljoin(
-                                registry.ROOT_DOMAIN,
-                                app.url_path_for("sucharek", sucharek_id=identifier),
-                            ),
-                            alt_text=post.text,
-                        ),
+                        Image(image_url=download_url, alt_text=post.text),
                     ],
                 )
             )
+
+
+@job(100000000000000000)
+async def upload_existing():
+    counter = 0
+    images = await registry.database.fetch_all(
+        b2_images.select().where(b2_images.c.plugin == PLUGIN_NAME)
+    )
+    for img in images:
+        counter += 1
+        logger.info(f"Uploading: {counter}")
+        await add_sucharek(img["image"], img["post_id"])

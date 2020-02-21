@@ -7,13 +7,13 @@ import click
 import uvicorn
 from starlette.config import environ
 
-import qbot.logging
+import qbot.config
 from qbot import scheduler
 from qbot.app import app
 
 
 def setup_logging():
-    logging.config.dictConfig(qbot.logging.CONFIG)
+    logging.config.dictConfig(qbot.config.LOGGING)
 
 
 HOST = os.environ.get("Q_HOST", "0.0.0.0")

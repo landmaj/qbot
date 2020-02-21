@@ -19,11 +19,16 @@ def job(timer: float):
         async def wrapper():
             logger.info(f"Running job: '{function.__module__}.{function.__name__}'.")
             try:
-                return await function()
+                result = await function()
             except Exception:
                 logger.exception(
                     f"Job '{function.__module__}.{function.__name__}' failed!"
                 )
+            else:
+                logger.info(
+                    f"Job finished: '{function.__module__}.{function.__name__}'."
+                )
+                return result
 
         wrapper.timer = timer
         _JOBS[wrapper] = time()

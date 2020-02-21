@@ -2,7 +2,7 @@ from typing import Optional, Set
 
 import sqlalchemy
 import validators
-from sqlalchemy import Column, Integer, LargeBinary, Table, Text, func, select
+from sqlalchemy import Boolean, Column, Integer, LargeBinary, Table, Text, func, select
 from sqlalchemy.dialects.postgresql import insert
 
 from qbot.core import registry
@@ -28,6 +28,19 @@ fortunki = sqlalchemy.Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("text", Text, nullable=False, unique=True),
+)
+
+b2_images = sqlalchemy.Table(
+    "b2_images",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("plugin", Text, nullable=False, index=True),
+    Column("extra", Text, nullable=True, index=True),
+    Column("deleted", Boolean, default=False, index=True),
+    Column("external_id", Text, unique=True, nullable=False),
+    Column("file_name", Text, unique=True, nullable=False),
+    Column("hash", Text, unique=True, nullable=False),
+    Column("url", Text, unique=True, nullable=False),
 )
 
 sucharki = sqlalchemy.Table(
@@ -105,3 +118,11 @@ async def _set_max_cache_size(table: Table):
 
 async def count(table: Table) -> int:
     return await registry.database.fetch_val(select([func.count()]).select_from(table))
+
+
+async def b2_images_count(plugin: str) -> int:
+    return await registry.database.fetch_val(
+        select([func.count()])
+        .select_from(b2_images)
+        .where(b2_images.c.plugin == plugin)
+    )

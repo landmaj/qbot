@@ -1,6 +1,5 @@
 import logging
 
-from sqlalchemy.sql.expression import func
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.endpoints import HTTPEndpoint
@@ -9,7 +8,6 @@ from starlette.responses import PlainTextResponse, Response
 from starlette.routing import Route
 
 from qbot.core import registry
-from qbot.db import sucharki
 from qbot.event import process_slack_event
 from qbot.utils import verify_signature
 
@@ -36,46 +34,7 @@ class Index(HTTPEndpoint):
         return PlainTextResponse("OK", background=task)
 
 
-async def random_sucharek(request: Request) -> Response:
-    result = await registry.database.fetch_one(
-        sucharki.select().order_by(func.random()).limit(1)
-    )
-    if result:
-        return Response(
-            result["image"],
-            200,
-            media_type="image/jpeg",
-            headers={
-                "Content-Disposition": f"inline;filename=\"sucharek_{result['id']}.jpg\""
-            },
-        )
-    return Response("SUCHO!", 404)
-
-
-async def sucharek(request: Request) -> Response:
-    sucharek_id = request.path_params["sucharek_id"]
-    result = await registry.database.fetch_one(
-        sucharki.select().where(sucharki.c.id == sucharek_id)
-    )
-    if result:
-        return Response(
-            result["image"],
-            200,
-            media_type="image/jpeg",
-            headers={
-                "Content-Disposition": f"inline;filename=\"sucharek_{result['id']}.jpg\""
-            },
-        )
-    return Response("NOT FOUND", 404)
-
-
-app = Starlette(
-    routes=[
-        Route("/", Index),
-        Route("/sucharek", random_sucharek),
-        Route("/sucharek/{sucharek_id:int}", sucharek),
-    ]
-)
+app = Starlette(routes=[Route("/", Index)])
 
 
 @app.on_event("startup")

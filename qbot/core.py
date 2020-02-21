@@ -1,35 +1,36 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
+from b2sdk.bucket import Bucket
 from databases import Database
 from httpx import AsyncClient
 from starlette.config import Config
 from starlette.datastructures import Secret
+
+from qbot.backblaze import setup_b3
 
 
 # noinspection PyAttributeOutsideInit
 class Registry:
     http_client: AsyncClient
     database: Database
+    _b3: Bucket = None
 
     def set_config_vars(self):
-        config = Config(".env")
-        self.REVISION = config("GIT_REV", default="N/A")
-        self.SIGNING_SECRET = config("Q_SIGNING_SECRET", cast=Secret)
-        self.SLACK_TOKEN = config("Q_SLACK_TOKEN", cast=Secret)
-        self.ROOT_DOMAIN = config("Q_ROOT_DOMAIN")
-        self.SPAM_CHANNEL_ID = config("Q_SPAM_CHANNEL_ID")
-        self.DATABASE_URL = config("DATABASE_URL", cast=Secret)
-        self.TESTING = config("TESTING", cast=bool, default=False)
-        self.DEPLOY_TIMESTAMP = config("DEPLOY_TIMESTAMP", cast=int, default=None)
+        self.config = Config(".env")
+        self.REVISION = self.config("GIT_REV", default="N/A")
+        self.SIGNING_SECRET = self.config("Q_SIGNING_SECRET", cast=Secret)
+        self.SLACK_TOKEN = self.config("Q_SLACK_TOKEN", cast=Secret)
+        self.ROOT_DOMAIN = self.config("Q_ROOT_DOMAIN")
+        self.DATABASE_URL = self.config("DATABASE_URL", cast=Secret)
+        self.SPAM_CHANNEL_ID = self.config("Q_SPAM_CHANNEL_ID")
+        self.DEPLOY_TIMESTAMP = self.config("DEPLOY_TIMESTAMP", cast=int, default=None)
 
     async def setup(self):
         self.set_config_vars()
         self.http_client = AsyncClient()
-        if self.TESTING:
-            self.database = Database(registry.DATABASE_URL, force_rollback=True)
-        else:
-            self.database = Database(registry.DATABASE_URL)
+
+        self.database = Database(self.DATABASE_URL)
         await self.database.connect()
 
     async def teardown(self):
@@ -41,6 +42,16 @@ class Registry:
         if self.DEPLOY_TIMESTAMP is None:
             return
         return datetime.utcnow() - datetime.utcfromtimestamp(self.DEPLOY_TIMESTAMP)
+
+    @property
+    def b3(self):
+        if self._b3 is None:
+            self._b3 = setup_b3(
+                bucket=self.config("Q_B2_BUCKET"),
+                app_key_id=self.config("Q_B2_KEY_ID"),
+                app_secret_key=str(self.config("Q_B2_SECRET_KEY", cast=Secret)),
+            )
+        return self._b3
 
 
 registry = Registry()

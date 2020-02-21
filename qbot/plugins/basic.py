@@ -2,8 +2,9 @@ from random import random
 
 from qbot.command import DESCRIPTIONS, add_command
 from qbot.core import registry
-from qbot.db import count, fortunki, nosacze, sucharki
+from qbot.db import b2_images_count, count, fortunki, nosacze
 from qbot.message import IncomingMessage, send_reply
+from qbot.plugins.sucharki import PLUGIN_NAME as SUCHARKI
 
 
 @add_command("ping", "dig it!")
@@ -36,7 +37,7 @@ async def top_command(message: IncomingMessage):
         f"*Repository:* https://github.com/landmaj/qbot\n"
         f"*Fortunki:* {await count(fortunki)}\n"
         f"*Nosacze:* {await count(nosacze)}\n"
-        f"*Psie sucharki:* {await count(sucharki)}"
+        f"*Psie sucharki:* {await b2_images_count(SUCHARKI)}"
     )
     await send_reply(message, text=text)
 
