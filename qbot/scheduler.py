@@ -50,6 +50,8 @@ async def _run_jobs():
                 tasks.append(func())
                 if func.timer is not None:
                     _JOBS[func] = current_time + func.timer
+                else:
+                    _JOBS.pop(func)
         await asyncio.gather(*tasks)
         await asyncio.sleep(0.1)
 
