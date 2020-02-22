@@ -108,7 +108,7 @@ async def add_nosacz(url: str) -> Optional[str]:
 @job(60)
 async def _upload_from_interim():
     for _ in range(await count(b2_images_interim)):
-        with registry.database.transaction():
+        async with registry.database.transaction():
             img = await registry.database.fetch_one(
                 b2_images_interim.select()
                 .where(b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
