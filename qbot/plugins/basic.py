@@ -2,8 +2,9 @@ from random import random
 
 from qbot.command import DESCRIPTIONS, add_command
 from qbot.core import registry
-from qbot.db import b2_images_count, count, fortunki, nosacze
+from qbot.db import b2_images_count, count, fortunki
 from qbot.message import IncomingMessage, send_reply
+from qbot.plugins.nosacz import PLUGIN_NAME_NOSACZE as NOSACZE
 from qbot.plugins.sucharki import PLUGIN_NAME as SUCHARKI
 
 
@@ -29,7 +30,7 @@ async def help_command(message: IncomingMessage) -> None:
 
 
 @add_command("about", "podstawowe informacje o bocie")
-async def top_command(message: IncomingMessage):
+async def about_command(message: IncomingMessage):
     text = (
         f"*Qbot rev.* {registry.REVISION:.8}\n"
         f"*Repository:* https://github.com/landmaj/qbot\n"
@@ -44,7 +45,7 @@ async def top_command(message: IncomingMessage):
 async def top_command(message: IncomingMessage):
     text = (
         f"*Fortunki:* {await count(fortunki)}\n"
-        f"*Nosacze:* {await count(nosacze)}\n"
+        f"*Nosacze:* {await b2_images_count(NOSACZE)}\n"
         f"*Psie sucharki:* {await b2_images_count(SUCHARKI)}"
     )
     await send_reply(message, text=text)
