@@ -2,8 +2,9 @@ from typing import Optional, Set
 
 import sqlalchemy
 import validators
-from sqlalchemy import Boolean, Column, Integer, Table, Text, func, select
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import Boolean, Column, Index, Integer, Table, Text, func, select
+from sqlalchemy.dialects.postgresql import JSONB, insert
+from sqlalchemy.ext.mutable import MutableDict
 
 from qbot.core import registry
 
@@ -42,6 +43,16 @@ b2_images_interim = sqlalchemy.Table(
     Column("plugin", Text, nullable=False, index=True),
     Column("url", Text, unique=True, nullable=False),
 )
+
+plugin_storage = sqlalchemy.Table(
+    "plugin_storage",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("plugin", Text, nullable=False),
+    Column("key", Text, nullable=False),
+    Column("data", MutableDict.as_mutable(JSONB)),
+)
+Index("ix_plugin_key", plugin_storage.c.plugin, plugin_storage.c.key, unique=True)
 
 
 async def query_with_recently_seen(
