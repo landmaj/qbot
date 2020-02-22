@@ -59,7 +59,7 @@ async def query_with_recently_seen(
     return await registry.database.fetch_one(query)
 
 
-async def b2_images_interim_insert(urls: str) -> str:
+async def b2_images_interim_insert(plugin: str, urls: str) -> str:
     validated, rejected = [], []
     for line in urls.split("\n"):
         # for some reason Slack adds triangular brackets to URLs
@@ -71,7 +71,7 @@ async def b2_images_interim_insert(urls: str) -> str:
     if len(validated) == 0:
         return "Nie podałeś żadnych poprawnych URL-i."
     query = insert(b2_images_interim).on_conflict_do_nothing(index_elements=["url"])
-    values = [{"url": x} for x in validated]
+    values = [{"url": x, "plugin": plugin} for x in validated]
     await registry.database.execute_many(query, values)
     response = f"Dodano {len(validated)} wiersz[y/ów]."
     if len(rejected) != 0:

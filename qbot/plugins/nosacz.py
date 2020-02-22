@@ -75,7 +75,7 @@ async def nosacz_cmd(message: IncomingMessage):
     safe_to_fix=False,
 )
 async def nosacz_dodaj_cmd(message: IncomingMessage):
-    response = await b2_images_interim_insert(message.text)
+    response = await b2_images_interim_insert(PLUGIN_NAME_NOSACZE, message.text)
     await send_reply(message, text=response)
 
 
