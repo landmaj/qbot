@@ -21,6 +21,7 @@ from qbot.scheduler import job
 
 logger = logging.getLogger(__name__)
 PLUGIN_NAME_NOSACZE = "nosacze"
+PLUGIN_NAME_FEELS = "feels"
 
 
 @add_command(
@@ -79,24 +80,38 @@ async def nosacz_dodaj_cmd(message: IncomingMessage):
     await send_reply(message, text=response)
 
 
-async def add_nosacz(url: str) -> Optional[str]:
+@add_command("feel", "Smutne memy od somsiada.", channel="fortunki")
+async def feel_cmd(message: IncomingMessage):
+    await send_random_image(message, PLUGIN_NAME_FEELS, "Smutny nosacz sundajski")
+
+
+@add_command(
+    "feel dodaj",
+    "`!feel dodaj -- https://example.com/image.jpg`",
+    channel="fortunki",
+    safe_to_fix=False,
+)
+async def feel_dodaj_cmd(message: IncomingMessage):
+    response = await b2_images_interim_insert(PLUGIN_NAME_FEELS, message.text)
+    await send_reply(message, text=response)
+
+
+async def _upload_image(url: str, plugin: str) -> Optional[str]:
     resp = await registry.http_client.get(url)
-    b2_image = upload_image(
-        content=resp.content, plugin=PLUGIN_NAME_NOSACZE, bucket=registry.b3
-    )
+    b2_image = upload_image(content=resp.content, plugin=plugin, bucket=registry.b3)
     if b2_image is None:
         await send_message(
             OutgoingMessage(
                 channel=registry.SPAM_CHANNEL_ID,
                 thread_ts=None,
-                blocks=[Text(f"Niepoprawny obrazek: {url}")],
+                blocks=[Text(f"Niepoprawny obrazek ({plugin}): {url}")],
             )
         )
         return
     await registry.database.execute(
         query=b2_images.insert(),
         values={
-            "plugin": PLUGIN_NAME_NOSACZE,
+            "plugin": plugin,
             "file_name": b2_image.file_name,
             "hash": b2_image.hash,
             "url": b2_image.url,
@@ -111,19 +126,27 @@ async def _upload_from_interim():
         async with registry.database.transaction():
             img = await registry.database.fetch_one(
                 b2_images_interim.select()
-                .where(b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
+                .where(
+                    (b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
+                    | (b2_images_interim.c.plugin == PLUGIN_NAME_FEELS)
+                )
                 .with_for_update(nowait=True)
             )
             if img is None:
                 return
             try:
-                await add_nosacz(img["url"])
+                await _upload_image(img["url"], img["plugin"])
             except Exception:
                 await send_message(
                     OutgoingMessage(
                         channel=registry.SPAM_CHANNEL_ID,
                         thread_ts=None,
-                        blocks=[Text(f"Nie udało się dodać nosacza: {img['url']}")],
+                        blocks=[
+                            Text(
+                                f"Nie udało się dodać obrazka "
+                                f"({img['plugin']}): {img['url']}"
+                            )
+                        ],
                     )
                 )
             finally:
