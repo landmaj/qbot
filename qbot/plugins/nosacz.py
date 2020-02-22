@@ -79,7 +79,7 @@ async def nosacz_dodaj_cmd(message: IncomingMessage):
 
 
 async def add_nosacz(url: str) -> Optional[str]:
-    resp = registry.http_client.get(url)
+    resp = await registry.http_client.get(url)
     b2_image = upload_image(
         content=resp.content, plugin=PLUGIN_NAME_NOSACZE, bucket=registry.b3
     )
