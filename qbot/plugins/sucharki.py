@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, timedelta
 from typing import Optional
 
-from sqlalchemy import func
 from vendor import facebook_scraper
 
 from qbot.backblaze import upload_image
@@ -15,7 +14,7 @@ from qbot.message import (
     OutgoingMessage,
     Text,
     send_message,
-    send_reply,
+    send_random_image,
 )
 from qbot.scheduler import job
 
@@ -25,17 +24,7 @@ PLUGIN_NAME = "sucharki"
 
 @add_command("sucharek", "Psie Sucharki", channel="fortunki", aliases=["s"])
 async def sucharek_cmd(message: IncomingMessage):
-    result = await registry.database.fetch_one(
-        b2_images.select()
-        .order_by(func.random())
-        .where((b2_images.c.plugin == PLUGIN_NAME) & (b2_images.c.deleted == False))
-    )
-    if result is None:
-        await send_reply(message, text="Źródełko sucharków jest suche.")
-        return
-    await send_reply(
-        message, blocks=[Image(image_url=result["url"], alt_text="Psi Sucharek")]
-    )
+    await send_random_image(message, PLUGIN_NAME, "Psi Sucharek")
 
 
 async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> str:

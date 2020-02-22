@@ -4,8 +4,11 @@ from dataclasses import dataclass
 from typing import List, Optional
 from urllib.parse import urljoin
 
+from sqlalchemy import func
+
 from qbot.consts import SLACK_URL
 from qbot.core import registry
+from qbot.db import b2_images
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +47,22 @@ async def send_reply(
             channel=reply_to.channel, thread_ts=reply_to.thread_ts, blocks=blocks
         )
     return await send_message(message)
+
+
+async def send_random_image(
+    message: "IncomingMessage", plugin_name: str, alt_text: str
+) -> None:
+    result = await registry.database.fetch_one(
+        b2_images.select()
+        .order_by(func.random())
+        .where((b2_images.c.plugin == plugin_name) & (b2_images.c.deleted == False))
+    )
+    if result is None:
+        await send_reply(message, text="Ni mo!")
+        return
+    await send_reply(
+        message, blocks=[Image(image_url=result["url"], alt_text=alt_text)]
+    )
 
 
 @dataclass()
