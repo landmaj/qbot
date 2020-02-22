@@ -35,7 +35,7 @@ async def xkcd():
                 channel=registry.SPAM_CHANNEL_ID,
                 thread_ts=None,
                 blocks=[
-                    Text(data["safe_title"]),
+                    Text(f"https://xkcd.com - {data['safe_title']}"),
                     Image(image_url=data["img"], alt_text=data["alt"]),
                 ],
             )
