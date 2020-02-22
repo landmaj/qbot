@@ -16,13 +16,6 @@ naming_convention = {
 }
 metadata = sqlalchemy.MetaData(naming_convention=naming_convention)
 
-nosacze = sqlalchemy.Table(
-    "nosacze",
-    metadata,
-    Column("id", Integer, primary_key=True),
-    Column("url", Text, nullable=False, unique=True),
-)
-
 fortunki = sqlalchemy.Table(
     "fortunki",
     metadata,
@@ -42,6 +35,14 @@ b2_images = sqlalchemy.Table(
     Column("url", Text, unique=True, nullable=False),
 )
 
+b2_images_interim = sqlalchemy.Table(
+    "b2_images_interim",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("plugin", Text, nullable=False, index=True),
+    Column("url", Text, unique=True, nullable=False),
+)
+
 
 async def query_with_recently_seen(
     table: Table, identifier: Optional[int] = None
@@ -58,7 +59,7 @@ async def query_with_recently_seen(
     return await registry.database.fetch_one(query)
 
 
-async def add_urls(table: Table, urls: str) -> str:
+async def b2_images_interim_insert(urls: str) -> str:
     validated, rejected = [], []
     for line in urls.split("\n"):
         # for some reason Slack adds triangular brackets to URLs
@@ -69,7 +70,7 @@ async def add_urls(table: Table, urls: str) -> str:
             rejected.append(line)
     if len(validated) == 0:
         return "Nie podałeś żadnych poprawnych URL-i."
-    query = insert(table).on_conflict_do_nothing(index_elements=["url"])
+    query = insert(b2_images_interim).on_conflict_do_nothing(index_elements=["url"])
     values = [{"url": x} for x in validated]
     await registry.database.execute_many(query, values)
     response = f"Dodano {len(validated)} wiersz[y/ów]."

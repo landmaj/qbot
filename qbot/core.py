@@ -7,8 +7,6 @@ from httpx import AsyncClient
 from starlette.config import Config
 from starlette.datastructures import Secret
 
-from qbot.backblaze import setup_b3
-
 
 # noinspection PyAttributeOutsideInit
 class Registry:
@@ -45,6 +43,8 @@ class Registry:
 
     @property
     def b3(self):
+        from qbot.backblaze import setup_b3
+
         if self._b3 is None:
             self._b3 = setup_b3(
                 bucket=self.config("Q_B2_BUCKET"),

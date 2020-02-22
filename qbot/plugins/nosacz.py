@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import b2_images, nosacze
+from qbot.db import b2_images, b2_images_interim, b2_images_interim_insert, count
 from qbot.message import (
     Image,
     IncomingMessage,
@@ -75,7 +75,8 @@ async def nosacz_cmd(message: IncomingMessage):
     safe_to_fix=False,
 )
 async def nosacz_dodaj_cmd(message: IncomingMessage):
-    await send_reply(message, text="`raise NotImplementedError`")
+    response = await b2_images_interim_insert(message.text)
+    await send_reply(message, text=response)
 
 
 async def add_nosacz(url: str) -> Optional[str]:
@@ -88,7 +89,7 @@ async def add_nosacz(url: str) -> Optional[str]:
             OutgoingMessage(
                 channel=registry.SPAM_CHANNEL_ID,
                 thread_ts=None,
-                blocks=[Text(f"Nie udało się dodać nosacza: {url}")],
+                blocks=[Text(f"Niepoprawny obrazek: {url}")],
             )
         )
         return
@@ -104,14 +105,30 @@ async def add_nosacz(url: str) -> Optional[str]:
     return b2_image.url
 
 
-@job()
-async def upload_existing():
-    images = await registry.database.fetch_all(nosacze.select())
-    count = 0
-    for img in images:
-        count += 1
-        logger.info(f"Uploading: {count}/{len(images)}")
-        try:
-            await add_nosacz(img["url"])
-        except Exception:
-            logger.error(f"Uploading failed: {img['url']}")
+@job(60)
+async def _upload_from_interim():
+    for _ in range(await count(b2_images_interim)):
+        with registry.database.transaction():
+            img = await registry.database.fetch_one(
+                b2_images_interim.select()
+                .where(b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
+                .with_for_update(nowait=True)
+            )
+            if img is None:
+                return
+            try:
+                await add_nosacz(img["url"])
+            except Exception:
+                await send_message(
+                    OutgoingMessage(
+                        channel=registry.SPAM_CHANNEL_ID,
+                        thread_ts=None,
+                        blocks=[Text(f"Nie udało się dodać nosacza: {img['url']}")],
+                    )
+                )
+            finally:
+                await registry.database.execute(
+                    b2_images_interim.delete().where(
+                        b2_images_interim.c.id == img["id"]
+                    )
+                )
