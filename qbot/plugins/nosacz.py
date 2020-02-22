@@ -98,7 +98,9 @@ async def feel_dodaj_cmd(message: IncomingMessage):
 
 async def _upload_image(url: str, plugin: str) -> Optional[str]:
     resp = await registry.http_client.get(url)
-    b2_image = upload_image(content=resp.content, plugin=plugin, bucket=registry.b3)
+    b2_image = await upload_image(
+        content=resp.content, plugin=plugin, bucket=registry.b3
+    )
     if b2_image is None:
         await send_message(
             OutgoingMessage(

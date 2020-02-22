@@ -28,7 +28,7 @@ def setup_b3(bucket: str, app_key_id: str, app_secret_key: str) -> Bucket:
     return b2_api.get_bucket_by_name(bucket)
 
 
-def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[Image]:
+async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[Image]:
     extension = imghdr.what("", h=content)
     if extension is None:
         return
