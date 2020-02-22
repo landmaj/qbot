@@ -31,8 +31,8 @@ b2_images = sqlalchemy.Table(
     Column("extra", Text, nullable=True, index=True),
     Column("deleted", Boolean, server_default="false", nullable=False, index=True),
     Column("file_name", Text, unique=True, nullable=False),
-    Column("hash", Text, unique=True, nullable=False),
-    Column("url", Text, unique=True, nullable=False),
+    Column("hash", Text, nullable=False, index=True),
+    Column("url", Text, nullable=False),
 )
 
 b2_images_interim = sqlalchemy.Table(
