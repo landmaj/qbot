@@ -110,6 +110,9 @@ async def _upload_image(url: str, plugin: str) -> Optional[str]:
             )
         )
         return
+    elif b2_image.exists:
+        logger.warning(f"Image already exists: {b2_image.file_name}.")
+        return
     await registry.database.execute(
         query=b2_images.insert(),
         values={

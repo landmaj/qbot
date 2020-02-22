@@ -15,6 +15,7 @@ class Image:
     file_name: str
     hash: str
     url: str
+    exists: bool = False
 
 
 def setup_b3(bucket: str, app_key_id: str, app_secret_key: str) -> Bucket:
@@ -45,6 +46,7 @@ async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[
             file_name=existing_image["file_name"],
             hash=existing_image["hash"],
             url=existing_image["url"],
+            exists=True,
         )
     file = bucket.upload_bytes(
         data_bytes=content,
