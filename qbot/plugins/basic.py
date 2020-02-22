@@ -28,13 +28,21 @@ async def help_command(message: IncomingMessage) -> None:
     await send_reply(message, text=text)
 
 
+@add_command("about", "podstawowe informacje o bocie")
+async def top_command(message: IncomingMessage):
+    text = (
+        f"*Qbot rev.* {registry.REVISION:.8}\n"
+        f"*Repository:* https://github.com/landmaj/qbot\n"
+        f"*Contributors*:\n"
+        f'\t- Michał "landmaj" Wieluński\n'
+        f'\t- Adrian "Necior" Sadłocha'
+    )
+    await send_reply(message, text=text)
+
+
 @add_command("top", "statystyki bota")
 async def top_command(message: IncomingMessage):
-    uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
     text = (
-        f"*Revision:* {registry.REVISION:.8}\n"
-        f"*Uptime:* {uptime}\n"
-        f"*Repository:* https://github.com/landmaj/qbot\n"
         f"*Fortunki:* {await count(fortunki)}\n"
         f"*Nosacze:* {await count(nosacze)}\n"
         f"*Psie sucharki:* {await b2_images_count(SUCHARKI)}"
@@ -47,17 +55,5 @@ async def uptime_command(message: IncomingMessage) -> None:
     if registry.uptime is None:
         await send_reply(message, text="N/A")
         return
-    total_seconds = int(registry.uptime.total_seconds())
-    days = total_seconds // 86_400
-    hours = total_seconds % 86_400 // 3600
-    minutes = total_seconds % 3600 // 60
-    seconds = total_seconds % 60
-    if days:
-        text = f"*Uptime:* {days} dni {hours} godzin {minutes} minut i {seconds} sekund"
-    elif hours:
-        text = f"*Uptime:* {hours} godzin {minutes} minut i {seconds} sekund"
-    elif minutes:
-        text = f"*Uptime:* {minutes} minut i {seconds} sekund"
-    else:
-        text = f"*Uptime:* {seconds} sekund"
-    await send_reply(message, text=text)
+    uptime = str(registry.uptime).split(".")[0] if registry.uptime else "N/a"
+    await send_reply(message, text=f"Uptime: {uptime}")

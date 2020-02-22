@@ -6,7 +6,9 @@ from asynctest import CoroutineMock
 from tests.utils import send_slack_request
 
 
-@pytest.mark.parametrize("message_text", ["!ping", "!help", "!uptime", "!top"])
+@pytest.mark.parametrize(
+    "message_text", ["!ping", "!help", "!uptime", "!top", "!about"]
+)
 @pytest.mark.asyncio
 async def test_command(aresponses, client, message_text):
     event = {
