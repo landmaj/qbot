@@ -27,8 +27,10 @@ async def sucharek_cmd(message: IncomingMessage):
     await send_random_image(message, PLUGIN_NAME, "Psi Sucharek")
 
 
-async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> str:
+async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> Optional[str]:
     b2_image = upload_image(content=image, plugin=PLUGIN_NAME, bucket=registry.b3)
+    if b2_image is None:
+        return
     await registry.database.execute(
         query=b2_images.insert(),
         values={
@@ -65,6 +67,8 @@ async def get_latest():
                 )
                 continue
             download_url = await add_sucharek(resp.content, post.id)
+            if download_url is None:
+                logger.error("Failed to upload a new sucharek.")
             await send_message(
                 OutgoingMessage(
                     channel=registry.SPAM_CHANNEL_ID,

@@ -1,6 +1,7 @@
 import hashlib
 import imghdr
 from dataclasses import dataclass
+from typing import Optional
 
 from b2sdk.bucket import Bucket
 from b2sdk.v1 import B2Api, InMemoryAccountInfo
@@ -25,11 +26,13 @@ def setup_b3(bucket: str, app_key_id: str, app_secret_key: str) -> Bucket:
     return b2_api.get_bucket_by_name(bucket)
 
 
-def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Image:
+def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[Image]:
+    extension = imghdr.what("", h=content)
+    if extension is None:
+        return
     hasher = hashlib.sha1()
     hasher.update(content)
     sha1 = hasher.hexdigest()
-    extension = imghdr.what("", h=content)
     file = bucket.upload_bytes(
         data_bytes=content,
         file_name=f"{plugin}_{sha1}.{extension}",
