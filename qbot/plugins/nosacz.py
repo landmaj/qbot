@@ -107,5 +107,11 @@ async def add_nosacz(url: str) -> Optional[str]:
 @job()
 async def upload_existing():
     images = await registry.database.fetch_all(nosacze.select())
+    count = 0
     for img in images:
-        await add_nosacz(img["url"])
+        count += 1
+        logger.info(f"Uploading: {count}/{len(images)}")
+        try:
+            await add_nosacz(img["url"])
+        except Exception:
+            logger.error(f"Uploading failed: {img['url']}")
