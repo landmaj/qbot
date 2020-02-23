@@ -16,8 +16,8 @@ def setup_logging():
     logging.config.dictConfig(qbot.config.LOGGING)
 
 
-HOST = os.environ.get("Q_HOST", "0.0.0.0")
-PORT = os.environ.get("Q_PORT", 5000)
+HOST = os.environ.get("HOST", "0.0.0.0")
+PORT = os.environ.get("PORT", 5000)
 environ["DEPLOY_TIMESTAMP"] = str(int(time.time()))
 
 

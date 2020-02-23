@@ -32,7 +32,7 @@ async def xkcd():
     if data["num"] != last_seen_comic:
         await send_message(
             OutgoingMessage(
-                channel=registry.SPAM_CHANNEL_ID,
+                channel=registry.CHANNEL_COMICS,
                 thread_ts=None,
                 blocks=[
                     Text(f"https://xkcd.com - {data['safe_title']}"),

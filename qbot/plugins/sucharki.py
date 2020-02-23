@@ -71,7 +71,7 @@ async def get_latest():
                 logger.error("Failed to upload a new sucharek.")
             await send_message(
                 OutgoingMessage(
-                    channel=registry.SPAM_CHANNEL_ID,
+                    channel=registry.CHANNEL_COMICS,
                     thread_ts=None,
                     blocks=[
                         Text("Nowy sucharek!"),

@@ -38,7 +38,7 @@ async def turnoffus():
     if data["title"] != last_seen_comic:
         await send_message(
             OutgoingMessage(
-                channel=registry.SPAM_CHANNEL_ID,
+                channel=registry.CHANNEL_COMICS,
                 thread_ts=None,
                 blocks=[
                     Text(f"http://turnoff.us - {data['title']}"),

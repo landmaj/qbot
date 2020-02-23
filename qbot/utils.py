@@ -27,7 +27,7 @@ def calculate_signature(timestamp, body):
     return (
         "v0="
         + hmac.new(
-            str.encode(str(registry.SIGNING_SECRET)), req, hashlib.sha256
+            str.encode(str(registry.SLACK_SIGNING_SECRET)), req, hashlib.sha256
         ).hexdigest()
     )
 

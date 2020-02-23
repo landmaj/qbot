@@ -104,7 +104,7 @@ async def _upload_image(url: str, plugin: str) -> Optional[str]:
     if b2_image is None:
         await send_message(
             OutgoingMessage(
-                channel=registry.SPAM_CHANNEL_ID,
+                channel=registry.CHANNEL_FORTUNKI,
                 thread_ts=None,
                 blocks=[Text(f"Niepoprawny obrazek ({plugin}): {url}")],
             )
@@ -144,7 +144,7 @@ async def _upload_from_interim():
             except Exception:
                 await send_message(
                     OutgoingMessage(
-                        channel=registry.SPAM_CHANNEL_ID,
+                        channel=registry.CHANNEL_FORTUNKI,
                         thread_ts=None,
                         blocks=[
                             Text(
