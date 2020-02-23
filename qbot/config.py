@@ -14,14 +14,7 @@ LOGGING = {
             "stream": "ext://sys.stdout",
             "level": "INFO",
             "formatter": "default",
-        },
-        "errors": {
-            "class": "logging.FileHandler",
-            "filename": "qbot-errors.log",
-            "mode": "w",
-            "level": "ERROR",
-            "formatter": "default",
-        },
+        }
     },
-    "root": {"level": "INFO", "handlers": ["console", "errors"]},
+    "root": {"level": "INFO", "handlers": ["console"]},
 }
