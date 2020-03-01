@@ -1,13 +1,15 @@
 import logging
 
+from sqlalchemy import func
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.endpoints import HTTPEndpoint
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, Response
+from starlette.responses import PlainTextResponse, RedirectResponse, Response
 from starlette.routing import Route
 
 from qbot.core import registry
+from qbot.db import b2_images
 from qbot.event import process_slack_event
 from qbot.utils import verify_signature
 
@@ -34,7 +36,19 @@ class Index(HTTPEndpoint):
         return PlainTextResponse("OK", background=task)
 
 
-app = Starlette(routes=[Route("/", Index)])
+async def random_image(request: Request) -> Response:
+    plugin = request.path_params["plugin"]
+    result = await registry.database.fetch_one(
+        b2_images.select()
+        .order_by(func.random())
+        .where((b2_images.c.plugin == plugin) & (b2_images.c.deleted == False))
+    )
+    if result is None:
+        return Response("Not Found", 404)
+    return RedirectResponse(result["url"])
+
+
+app = Starlette(routes=[Route("/", Index), Route("/image/{plugin}", random_image)])
 
 
 @app.on_event("startup")
