@@ -35,6 +35,7 @@ lxml==4.5.0               # via pyquery
 mako==1.1.1               # via alembic
 markupsafe==1.1.1         # via mako
 parse==1.14.0             # via requests-html
+passlib==1.7.2
 psycopg2-binary==2.8.4    # via databases
 psycopg2==2.8.4
 pyee==7.0.1               # via pyppeteer

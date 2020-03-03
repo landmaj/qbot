@@ -54,6 +54,14 @@ plugin_storage = sqlalchemy.Table(
 )
 Index("ix_plugin_key", plugin_storage.c.plugin, plugin_storage.c.key, unique=True)
 
+credentials = sqlalchemy.Table(
+    "credentials",
+    metadata,
+    Column("login", Text, primary_key=True),
+    Column("password", Text, nullable=False),
+    Column("username", Text, nullable=False),
+)
+
 
 async def query_with_recently_seen(
     table: Table, identifier: Optional[int] = None

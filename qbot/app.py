@@ -2,12 +2,16 @@ import logging
 
 from sqlalchemy import func
 from starlette.applications import Starlette
+from starlette.authentication import requires
 from starlette.background import BackgroundTask
 from starlette.endpoints import HTTPEndpoint
+from starlette.middleware import Middleware
+from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, RedirectResponse, Response
 from starlette.routing import Route
 
+from qbot.auth import BasicAuthBackend
 from qbot.core import registry
 from qbot.db import b2_images
 from qbot.event import process_slack_event
@@ -48,7 +52,19 @@ async def random_image(request: Request) -> Response:
     return RedirectResponse(result["url"])
 
 
-app = Starlette(routes=[Route("/", Index), Route("/image/{plugin}", random_image)])
+@requires("authenticated")
+async def login(request: Request) -> Response:
+    return PlainTextResponse(f"Hello, {request.user.display_name}")
+
+
+app = Starlette(
+    routes=[
+        Route("/", Index),
+        Route("/login", login),
+        Route("/image/{plugin}", random_image),
+    ],
+    middleware=[Middleware(AuthenticationMiddleware, backend=BasicAuthBackend())],
+)
 
 
 @app.on_event("startup")
