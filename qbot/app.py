@@ -77,6 +77,7 @@ async def news(request: Request) -> Response:
             f"from '{request.user.display_name}'."
         )
         return PlainTextResponse("Bad Request", 400)
+    block.text = f"*{request.user.display_name}:* {block.text}"
     return PlainTextResponse(
         "OK",
         background=BackgroundTask(
