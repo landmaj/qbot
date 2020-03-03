@@ -1,5 +1,7 @@
+import json
 import logging
 
+from pydantic import ValidationError
 from sqlalchemy import func
 from starlette.applications import Starlette
 from starlette.authentication import requires
@@ -8,13 +10,19 @@ from starlette.endpoints import HTTPEndpoint
 from starlette.middleware import Middleware
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, RedirectResponse, Response
+from starlette.responses import (
+    JSONResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    Response,
+)
 from starlette.routing import Route
 
 from qbot.auth import BasicAuthBackend
 from qbot.core import registry
 from qbot.db import b2_images
 from qbot.event import process_slack_event
+from qbot.message import OutgoingMessage, TextWithLink, send_message
 from qbot.utils import verify_signature
 
 
@@ -57,10 +65,34 @@ async def login(request: Request) -> Response:
     return PlainTextResponse(f"Hello, {request.user.display_name}")
 
 
+@requires("authenticated")
+async def news(request: Request) -> Response:
+    try:
+        block = TextWithLink(**await request.json())
+    except ValidationError as exc:
+        return JSONResponse(json.loads(exc.json()), 400)
+    except Exception:
+        logging.exception(
+            f"Could not deserialize or validate JSON in '{news.__name__}' "
+            f"from '{request.user.display_name}'."
+        )
+        return PlainTextResponse("Bad Request", 400)
+    return PlainTextResponse(
+        "OK",
+        background=BackgroundTask(
+            send_message,
+            message=OutgoingMessage(
+                channel=registry.CHANNEL_NEWS, thread_ts=None, blocks=[block]
+            ),
+        ),
+    )
+
+
 app = Starlette(
     routes=[
         Route("/", Index),
         Route("/login", login),
+        Route("/news", news, methods=["POST"]),
         Route("/image/{plugin}", random_image),
     ],
     middleware=[Middleware(AuthenticationMiddleware, backend=BasicAuthBackend())],

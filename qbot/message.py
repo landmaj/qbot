@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 from urllib.parse import urljoin
 
+from pydantic.dataclasses import dataclass as pydantic_dataclass
+from pydantic.networks import AnyHttpUrl
 from sqlalchemy import func
 
 from qbot.consts import SLACK_URL
@@ -127,5 +129,22 @@ class TextWithButton(Block):
             "accessory": {
                 "type": "button",
                 "text": {"type": "plain_text", "text": self.button_text},
+            },
+        }
+
+
+@pydantic_dataclass()
+class TextWithLink(Block):
+    text: str
+    link: AnyHttpUrl
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": self.text},
+            "accessory": {
+                "type": "button",
+                "text": {"type": "plain_text", "text": "GO"},
+                "url": self.link,
             },
         }
