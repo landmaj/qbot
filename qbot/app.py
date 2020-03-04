@@ -48,6 +48,7 @@ class Index(HTTPEndpoint):
         return PlainTextResponse("OK", background=task)
 
 
+@requires("authenticated")
 async def random_image(request: Request) -> Response:
     plugin = request.path_params["plugin"]
     result = await registry.database.fetch_one(
