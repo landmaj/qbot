@@ -4,8 +4,8 @@ from qbot.command import DESCRIPTIONS, add_command
 from qbot.core import registry
 from qbot.db import b2_images_count, count, fortunki
 from qbot.message import IncomingMessage, send_reply
-from qbot.plugins.nosacz import PLUGIN_NAME_FEELS as FEELS
-from qbot.plugins.nosacz import PLUGIN_NAME_NOSACZE as NOSACZE
+from qbot.plugins.img import PLUGIN_NAME_FEELS as FEELS
+from qbot.plugins.img import PLUGIN_NAME_NOSACZE as NOSACZE
 from qbot.plugins.sucharki import PLUGIN_NAME as SUCHARKI
 
 

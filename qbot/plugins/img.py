@@ -1,14 +1,11 @@
 import logging
 from typing import Optional
 
-from bs4 import BeautifulSoup
-
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
 from qbot.db import b2_images, b2_images_interim, b2_images_interim_insert, count
 from qbot.message import (
-    Image,
     IncomingMessage,
     OutgoingMessage,
     Text,
@@ -16,52 +13,12 @@ from qbot.message import (
     send_random_image,
     send_reply,
 )
-from qbot.plugins.excuse import bot_malfunction
 from qbot.scheduler import job
 
 logger = logging.getLogger(__name__)
 PLUGIN_NAME_NOSACZE = "nosacze"
 PLUGIN_NAME_FEELS = "feels"
-
-
-@add_command(
-    "janusz",
-    "Losowe memiszcze z janusznosacz.pl.",
-    channel="fortunki",
-    aliases=["j", "janush"],
-)
-async def janusz_cmd(message: IncomingMessage):
-    while True:
-        resp = await registry.http_client.get("http://www.janusznosacz.pl/losuj")
-        if not 200 <= resp.status_code < 400:
-            logger.error(
-                f"Incorrect response from janusznosacz.pl. Status: {resp.status}."
-            )
-            await bot_malfunction(message)
-            return
-        # random image sometimes returns an error and redirects to the home page
-        if resp.url.path == "/":
-            continue
-        body = resp.text
-        break
-
-    soup = BeautifulSoup(body, "html.parser")
-    try:
-        image_url = (
-            soup.find("div", {"class": "img-inner-box"}).find("a").find("img")["src"]
-        )
-        alt_text = (
-            soup.find("div", {"class": "image-box"})
-            .find("h2")
-            .get_text()
-            .strip()
-            .split("\n")[0]
-        )
-    except Exception:
-        logger.exception("Could not extract image source from the page.")
-        await bot_malfunction(message)
-        return
-    await send_reply(message, blocks=[Image(image_url, alt_text)])
+PLUGIN_NAME_VIRUS = "wirus"
 
 
 @add_command("nosacz", "Nieświeże memy od somsiada.", channel="fortunki", aliases=["n"])
@@ -93,6 +50,27 @@ async def feel_cmd(message: IncomingMessage):
 )
 async def feel_dodaj_cmd(message: IncomingMessage):
     response = await b2_images_interim_insert(PLUGIN_NAME_FEELS, message.text)
+    await send_reply(message, text=response)
+
+
+@add_command(
+    "virus",
+    "I tak już masz wirusa.",
+    channel="fortunki",
+    aliases=["wirus", "korona", "corona", "koronawirus", "coronavirus", "v", "k"],
+)
+async def virus_cmd(message: IncomingMessage):
+    await send_random_image(message, PLUGIN_NAME_VIRUS, "Mem w koronie")
+
+
+@add_command(
+    "virus dodaj",
+    "`!virus dodaj -- https://example.com/image.jpg`",
+    channel="fortunki",
+    safe_to_fix=False,
+)
+async def virus_dodaj_cmd(message: IncomingMessage):
+    response = await b2_images_interim_insert(PLUGIN_NAME_VIRUS, message.text)
     await send_reply(message, text=response)
 
 
@@ -134,6 +112,7 @@ async def _upload_from_interim():
                 .where(
                     (b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
                     | (b2_images_interim.c.plugin == PLUGIN_NAME_FEELS)
+                    | (b2_images_interim.c.plugin == PLUGIN_NAME_VIRUS)
                 )
                 .with_for_update(nowait=True)
             )
