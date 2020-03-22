@@ -1,3 +1,4 @@
+from html import unescape
 from typing import Optional, Set
 
 import sqlalchemy
@@ -90,7 +91,7 @@ async def b2_images_interim_insert(plugin: str, urls: str) -> str:
     if len(validated) == 0:
         return "Nie podałeś żadnych poprawnych URL-i."
     query = insert(b2_images_interim).on_conflict_do_nothing(index_elements=["url"])
-    values = [{"url": x, "plugin": plugin} for x in validated]
+    values = [{"url": unescape(x), "plugin": plugin} for x in validated]
     await registry.database.execute_many(query, values)
     response = f"Dodano {len(validated)} wiersz[y/ów]."
     if len(rejected) != 0:
