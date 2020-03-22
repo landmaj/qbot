@@ -80,6 +80,7 @@ async def _upload_image(url: str, plugin: str) -> Optional[str]:
         content=resp.content, plugin=plugin, bucket=registry.b3
     )
     if b2_image is None:
+        logger.error(f"Could not determine image extension. Content:\n{resp.content}")
         await send_message(
             OutgoingMessage(
                 channel=registry.CHANNEL_FORTUNKI,
