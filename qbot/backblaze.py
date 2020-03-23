@@ -1,10 +1,10 @@
 import hashlib
-import imghdr
 from dataclasses import dataclass
 from typing import Optional
 
 from b2sdk.bucket import Bucket
 from b2sdk.v1 import B2Api, InMemoryAccountInfo
+from vendor.imghdr import what
 
 from qbot.core import registry
 from qbot.db import b2_images
@@ -30,7 +30,7 @@ def setup_b3(bucket: str, app_key_id: str, app_secret_key: str) -> Bucket:
 
 
 async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[Image]:
-    extension = imghdr.what("", h=content)
+    extension = what("", h=content)
     if extension is None:
         return
     hasher = hashlib.sha1()
