@@ -39,7 +39,6 @@ class Index(HTTPEndpoint):
             return PlainTextResponse("Could not verify signature.", 400)
 
         data = await request.json()
-        logging.info(data)
         if "challenge" in data:
             return PlainTextResponse(data["challenge"])
 
