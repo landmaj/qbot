@@ -38,6 +38,16 @@ git remote add dokku dokku@dokku_server:qbot
 git push dokku master
 ```
 
+Required Bot Token Scopes in OAuth & Permissions:
+```
+channels:history
+channels:read
+chat:write
+files:read
+im:history
+im:read
+```
+
 ## License
 
 This project is released under the [MIT License](LICENSE).
