@@ -61,9 +61,11 @@ async def fortunka_dodaj(message: IncomingMessage):
             return
         img_url: str = message.files[0]["url_private"]
         resp = await registry.http_client.get(
-            img_url, headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"}
+            img_url,
+            headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
+            allow_redirects=False,  # to avoid login screen
         )
-        if not 200 <= resp.status_code < 400:
+        if not 200 <= resp.status_code < 300:
             await send_reply(message, "Nie udało się pobrać obrazka.")
             return
         b2_image = await upload_image(
