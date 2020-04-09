@@ -37,6 +37,7 @@ async def message_handler(event: dict):
         text=event.get("text", ""),
         ts=event["ts"],
         thread_ts=event.get("thread_ts"),
+        files=event.get("files"),
     )
     if message.text.startswith("!") and message.user != "BOT":
         splitted_message = message.text.split("--", 1)

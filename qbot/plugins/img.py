@@ -4,7 +4,7 @@ from typing import Optional
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import b2_images, b2_images_interim, b2_images_interim_insert, count
+from qbot.db import b2_images_interim, b2_images_interim_insert, count
 from qbot.message import (
     IncomingMessage,
     OutgoingMessage,
@@ -92,15 +92,6 @@ async def _upload_image(url: str, plugin: str) -> Optional[str]:
     elif b2_image.exists:
         logger.warning(f"Image already exists: {b2_image.file_name}.")
         return
-    await registry.database.execute(
-        query=b2_images.insert(),
-        values={
-            "plugin": plugin,
-            "file_name": b2_image.file_name,
-            "hash": b2_image.hash,
-            "url": b2_image.url,
-        },
-    )
     return b2_image.url
 
 

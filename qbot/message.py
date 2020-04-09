@@ -75,6 +75,7 @@ class IncomingMessage:
     text: str
     ts: str
     thread_ts: Optional[str]
+    files: Optional[List[dict]]
 
 
 @dataclass()

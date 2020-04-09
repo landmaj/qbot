@@ -3,7 +3,17 @@ from typing import Optional, Set
 
 import sqlalchemy
 import validators
-from sqlalchemy import Boolean, Column, Index, Integer, Table, Text, func, select
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    Table,
+    Text,
+    func,
+    select,
+)
 from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.ext.mutable import MutableDict
 
@@ -23,6 +33,7 @@ fortunki = sqlalchemy.Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("text", Text, nullable=False, unique=True),
+    Column("image", ForeignKey("b2_images.id"), nullable=True),
 )
 
 b2_images = sqlalchemy.Table(

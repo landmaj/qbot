@@ -15,6 +15,7 @@ class Image:
     file_name: str
     hash: str
     url: str
+    id: int
     exists: bool = False
 
 
@@ -46,6 +47,7 @@ async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[
             file_name=existing_image["file_name"],
             hash=existing_image["hash"],
             url=existing_image["url"],
+            id=existing_image["id"],
             exists=True,
         )
     file = bucket.upload_bytes(
@@ -54,4 +56,16 @@ async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[
         file_infos={"plugin": plugin},
     )
     download_url = bucket.get_download_url(file.file_name)
-    return Image(file_name=file.file_name, hash=file.content_sha1, url=download_url)
+    _id = await registry.database.execute(
+        query=b2_images.insert(),
+        values={
+            "plugin": plugin,
+            "file_name": file.file_name,
+            "hash": file.content_sha1,
+            "url": download_url,
+        },
+    )
+    image = Image(
+        file_name=file.file_name, hash=file.content_sha1, url=download_url, id=_id
+    )
+    return image
