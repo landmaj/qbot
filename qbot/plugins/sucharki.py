@@ -28,19 +28,11 @@ async def sucharek_cmd(message: IncomingMessage):
 
 
 async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> Optional[str]:
-    b2_image = await upload_image(content=image, plugin=PLUGIN_NAME, bucket=registry.b3)
+    b2_image = await upload_image(
+        content=image, plugin=PLUGIN_NAME, bucket=registry.b3, extra=post_id
+    )
     if b2_image is None:
         return
-    await registry.database.execute(
-        query=b2_images.insert(),
-        values={
-            "plugin": PLUGIN_NAME,
-            "extra": post_id,
-            "file_name": b2_image.file_name,
-            "hash": b2_image.hash,
-            "url": b2_image.url,
-        },
-    )
     return b2_image.url
 
 

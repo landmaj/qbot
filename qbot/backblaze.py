@@ -30,7 +30,9 @@ def setup_b3(bucket: str, app_key_id: str, app_secret_key: str) -> Bucket:
     return b2_api.get_bucket_by_name(bucket)
 
 
-async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[Image]:
+async def upload_image(
+    content: bytes, plugin: str, bucket: Bucket, extra: Optional[str] = None
+) -> Optional[Image]:
     extension = what("", h=content)
     if extension is None:
         return
@@ -63,6 +65,7 @@ async def upload_image(content: bytes, plugin: str, bucket: Bucket) -> Optional[
             "file_name": file.file_name,
             "hash": file.content_sha1,
             "url": download_url,
+            "extra": extra,
         },
     )
     image = Image(
