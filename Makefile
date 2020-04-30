@@ -6,7 +6,8 @@ destroy:
 
 venv:
 	-python3.8 -m venv .venv
-	$(CMD) pip install pip-tools
+	$(CMD) pip install pip==20.0.2
+	$(CMD) pip install pip-tools==5.1.0
 
 install:
 	$(CMD) pip-sync requirements.txt dev-requirements.txt
