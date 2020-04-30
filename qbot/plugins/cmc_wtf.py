@@ -40,9 +40,9 @@ async def wtf():
     if latest["id"] != last_seen_comic:
         summary_html = latest["summary"].split("<!-- Easy Reader Version:")[0]
         summary_mrkdn = markdownify(summary_html).strip()
-        await send_message(
-            SimpleMessage(channel=registry.CHANNEL_COMICS, text=summary_mrkdn)
-        )
+        title = latest["title"]
+        post = f"*{title}*\n{latest['id']}\n\n{summary_mrkdn}"
+        await send_message(SimpleMessage(channel=registry.CHANNEL_COMICS, text=post))
         if last_seen_comic is None:
             await registry.database.execute(
                 plugin_storage.insert(),
