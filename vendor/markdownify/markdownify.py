@@ -130,7 +130,7 @@ class MarkdownConverter(object):
         return "  \n"
 
     def convert_em(self, el, text):
-        return "*%s*" % text if text else ""
+        return "_%s_" % text if text else ""
 
     def convert_hn(self, n, el, text):
         style = self.options["heading_style"]
@@ -181,7 +181,7 @@ class MarkdownConverter(object):
         return "```\n%s\n```\n" % text if text else ""
 
     def convert_strong(self, el, text):
-        return "**%s**" % text if text else ""
+        return "*%s*" % text if text else ""
 
     def convert_img(self, el, text):
         alt = el.attrs.get("alt", None) or ""

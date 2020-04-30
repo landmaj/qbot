@@ -15,7 +15,7 @@ from qbot.db import b2_images
 logger = logging.getLogger(__name__)
 
 
-async def send_message(message: "OutgoingMessage") -> bool:
+async def send_message(message: "Message") -> bool:
     data = message.to_dict()
     resp = await registry.http_client.post(
         url=urljoin(SLACK_URL, "chat.postMessage"),
@@ -79,7 +79,22 @@ class IncomingMessage:
 
 
 @dataclass()
-class OutgoingMessage:
+class Message:
+    def to_dict(self) -> dict:
+        raise NotImplementedError
+
+
+@dataclass()
+class SimpleMessage(Message):
+    channel: str
+    text: str
+
+    def to_dict(self) -> dict:
+        return {"channel": self.channel, "text": self.text}
+
+
+@dataclass()
+class OutgoingMessage(Message):
     channel: str
     thread_ts: Optional[str]
     blocks: [List["Block"]]

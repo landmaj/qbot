@@ -5,7 +5,7 @@ from vendor.markdownify import markdownify
 
 from qbot.core import registry
 from qbot.db import plugin_storage
-from qbot.message import OutgoingMessage, Text, send_message
+from qbot.message import SimpleMessage, send_message
 from qbot.scheduler import job
 
 PLUGIN_NAME = "wtf"
@@ -41,11 +41,7 @@ async def wtf():
         summary_html = latest["summary"].split("<!-- Easy Reader Version:")[0]
         summary_mrkdn = markdownify(summary_html).strip()
         await send_message(
-            OutgoingMessage(
-                channel=registry.CHANNEL_COMICS,
-                thread_ts=None,
-                blocks=[Text(summary_mrkdn)],
-            )
+            SimpleMessage(channel=registry.CHANNEL_COMICS, text=summary_mrkdn)
         )
         if last_seen_comic is None:
             await registry.database.execute(
