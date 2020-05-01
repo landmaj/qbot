@@ -39,7 +39,7 @@ async def nosacz_cmd(message: IncomingMessage):
     safe_to_fix=False,
 )
 async def nosacz_dodaj_cmd(message: IncomingMessage):
-    response = await b2_images_interim_insert(PLUGIN_NAME_NOSACZE, message.text)
+    response = await _add_to_interim(PLUGIN_NAME_NOSACZE, message)
     await send_reply(message, text=response)
 
 
@@ -60,7 +60,7 @@ async def virus_cmd(message: IncomingMessage):
     safe_to_fix=False,
 )
 async def virus_dodaj_cmd(message: IncomingMessage):
-    response = await b2_images_interim_insert(PLUGIN_NAME_VIRUS, message.text)
+    response = await _add_to_interim(PLUGIN_NAME_VIRUS, message)
     await send_reply(message, text=response)
 
 

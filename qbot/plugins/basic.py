@@ -5,6 +5,7 @@ from qbot.core import registry
 from qbot.db import b2_images_count, count, fortunki
 from qbot.message import IncomingMessage, send_reply
 from qbot.plugins.img import PLUGIN_NAME_NOSACZE as NOSACZE
+from qbot.plugins.img import PLUGIN_NAME_PTAK as PTAKI
 from qbot.plugins.img import PLUGIN_NAME_VIRUS as VIRUS
 from qbot.plugins.sucharki import PLUGIN_NAME as SUCHARKI
 
@@ -48,6 +49,7 @@ async def top_command(message: IncomingMessage):
         f"*Fortunki:* {await count(fortunki)}\n"
         f"*Nosacze:* {await b2_images_count(NOSACZE)}\n"
         f"*Psie sucharki:* {await b2_images_count(SUCHARKI)}\n"
+        f"*Ptaki:* {await b2_images_count(PTAKI)}\n"
         f"*Wirusy:* {await b2_images_count(VIRUS)}"
     )
     await send_reply(message, text=text)
