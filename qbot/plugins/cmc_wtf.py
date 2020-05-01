@@ -1,6 +1,7 @@
 import logging
 
 import feedparser
+from bs4 import BeautifulSoup
 from vendor.markdownify import markdownify
 
 from qbot.core import registry
@@ -38,10 +39,18 @@ async def wtf():
     rss = feedparser.parse(resp.text)
     latest = rss.entries[0]
     if latest["id"] != last_seen_comic:
-        summary_html = latest["summary"].split("<!-- Easy Reader Version:")[0]
-        summary_mrkdn = markdownify(summary_html).strip()
         title = latest["title"]
-        post = f"*{title}*\n{latest['id']}\n\n{summary_mrkdn}"
+        header = f"*{title}*\n{latest['id']}"
+        summary_html = latest["summary"].split("<!-- Easy Reader Version:")[0]
+        soup = BeautifulSoup(summary_html, "html.parser")
+        image = soup.find("img")
+        if image is not None:
+            post = (
+                f"{header}\n\nToday's WTF contains images and cannot be displayed here."
+            )
+        else:
+            summary_mrkdn = markdownify(summary_html).strip()
+            post = f"{header}\n\n{summary_mrkdn}"
         await send_message(SimpleMessage(channel=registry.CHANNEL_COMICS, text=post))
         if last_seen_comic is None:
             await registry.database.execute(
