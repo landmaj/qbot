@@ -19,7 +19,7 @@ async def validate_password(login: str, password: str) -> SimpleUser:
     )
     if result is None or not pbkdf2_sha256.verify(password, result["password"]):
         raise AuthenticationError("Invalid credentials")
-    return SimpleUser(result["username"])
+    return SimpleUser(result["login"])
 
 
 class BasicAuthBackend(AuthenticationBackend):
@@ -36,6 +36,6 @@ class BasicAuthBackend(AuthenticationBackend):
         except (ValueError, UnicodeDecodeError, binascii.Error):
             raise AuthenticationError("Invalid credentials")
 
-        username, _, password = decoded.partition(":")
-        user = await validate_password(username, password)
+        login, _, password = decoded.partition(":")
+        user = await validate_password(login, password)
         return AuthCredentials(["authenticated"]), user

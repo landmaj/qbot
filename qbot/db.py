@@ -71,7 +71,6 @@ credentials = sqlalchemy.Table(
     metadata,
     Column("login", Text, primary_key=True),
     Column("password", Text, nullable=False),
-    Column("username", Text, nullable=False),
 )
 
 
