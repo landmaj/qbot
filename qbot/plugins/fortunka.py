@@ -55,8 +55,8 @@ async def fortunka_dodaj(message: IncomingMessage):
         if len(message.files) != 1:
             await send_reply(message, text="Poproszę pojedynczy plik.")
             return
-        mimetime: str = message.files[0]["mimetype"]
-        if mimetime.split("/")[0] != "image":
+        mimetype: str = message.files[0]["mimetype"]
+        if mimetype.split("/")[0] != "image":
             await send_reply(message, text="Przesłany plik nie jest obrazkiem.")
             return
         img_url: str = message.files[0]["url_private"]

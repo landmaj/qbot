@@ -1,5 +1,5 @@
 from html import unescape
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 import sqlalchemy
 import validators
@@ -109,6 +109,29 @@ async def b2_images_interim_insert(plugin: str, urls: str) -> str:
         text = "\n".join(rejected)
         incorrect_urls = (
             f"*Poniższe wartości są niepoprawne i nie zostały dodane:*\n{text}"
+        )
+        response = f"{response}\n{incorrect_urls}"
+    return response
+
+
+async def b2_images_interim_insert_from_slack(plugin: str, files: List[dict]) -> str:
+    errors: List[str] = []
+    urls: List[str] = []
+    for f in files:
+        mimetype: str = f["mimetype"]
+        url: str = f["url_private"]
+        if mimetype.split("/")[0] != "image":
+            errors.append(f"{url} - NOT AN IMAGE")
+            continue
+        urls.append(url)
+    query = insert(b2_images_interim).on_conflict_do_nothing(index_elements=["url"])
+    values = [{"url": x, "plugin": plugin} for x in urls]
+    await registry.database.execute_many(query, values)
+    response = f"Dodano {len(urls)} wiersz[y/ów]."
+    if len(errors) != 0:
+        text = "\n".join(errors)
+        incorrect_urls = (
+            f"*Poniższe pliki są niepoprawne i nie zostały dodane:*\n{text}"
         )
         response = f"{response}\n{incorrect_urls}"
     return response
