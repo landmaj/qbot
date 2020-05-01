@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from urllib.parse import urlparse
 
 from qbot.backblaze import upload_image
 from qbot.command import add_command
@@ -91,7 +92,24 @@ async def _add_to_interim(plugin: str, message: IncomingMessage) -> str:
 
 
 async def _upload_image(url: str, plugin: str) -> Optional[str]:
-    resp = await registry.http_client.get(url)
+    parsed_url = urlparse(url)
+    if parsed_url.netloc == "files.slack.com":
+        resp = await registry.http_client.get(
+            url,
+            headers={"Authorization": f"Bearer {str(registry.SLACK_TOKEN)}"},
+            allow_redirects=False,  # to avoid login screen
+        )
+    else:
+        resp = await registry.http_client.get(url)
+    if not 200 <= resp.status_code < 300:
+        await send_message(
+            OutgoingMessage(
+                channel=registry.CHANNEL_FORTUNKI,
+                thread_ts=None,
+                blocks=[Text(f"Nie udało się pobrać obrazka: {url}")],
+            )
+        )
+        return
     b2_image = await upload_image(
         content=resp.content, plugin=plugin, bucket=registry.b3
     )
@@ -120,6 +138,7 @@ async def _upload_from_interim():
                 .where(
                     (b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
                     | (b2_images_interim.c.plugin == PLUGIN_NAME_VIRUS)
+                    | (b2_images_interim.c.plugin == PLUGIN_NAME_PTAK)
                 )
                 .with_for_update(nowait=True)
             )

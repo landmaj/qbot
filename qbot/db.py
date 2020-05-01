@@ -121,7 +121,7 @@ async def b2_images_interim_insert_from_slack(plugin: str, files: List[dict]) ->
         mimetype: str = f["mimetype"]
         url: str = f["url_private"]
         if mimetype.split("/")[0] != "image":
-            errors.append(f"{url} - NOT AN IMAGE")
+            errors.append(url)
             continue
         urls.append(url)
     query = insert(b2_images_interim).on_conflict_do_nothing(index_elements=["url"])
