@@ -17,7 +17,6 @@ from qbot.scheduler import job
 
 logger = logging.getLogger(__name__)
 PLUGIN_NAME_NOSACZE = "nosacze"
-PLUGIN_NAME_FEELS = "feels"
 PLUGIN_NAME_VIRUS = "wirus"
 
 
@@ -34,22 +33,6 @@ async def nosacz_cmd(message: IncomingMessage):
 )
 async def nosacz_dodaj_cmd(message: IncomingMessage):
     response = await b2_images_interim_insert(PLUGIN_NAME_NOSACZE, message.text)
-    await send_reply(message, text=response)
-
-
-@add_command("feel", "Smutne memy od somsiada.", channel="fortunki")
-async def feel_cmd(message: IncomingMessage):
-    await send_random_image(message, PLUGIN_NAME_FEELS, "Smutny nosacz sundajski")
-
-
-@add_command(
-    "feel dodaj",
-    "`!feel dodaj -- https://example.com/image.jpg`",
-    channel="fortunki",
-    safe_to_fix=False,
-)
-async def feel_dodaj_cmd(message: IncomingMessage):
-    response = await b2_images_interim_insert(PLUGIN_NAME_FEELS, message.text)
     await send_reply(message, text=response)
 
 
@@ -103,7 +86,6 @@ async def _upload_from_interim():
                 b2_images_interim.select()
                 .where(
                     (b2_images_interim.c.plugin == PLUGIN_NAME_NOSACZE)
-                    | (b2_images_interim.c.plugin == PLUGIN_NAME_FEELS)
                     | (b2_images_interim.c.plugin == PLUGIN_NAME_VIRUS)
                 )
                 .with_for_update(nowait=True)
