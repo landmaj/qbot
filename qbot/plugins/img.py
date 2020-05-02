@@ -66,7 +66,7 @@ async def virus_dodaj_cmd(message: IncomingMessage):
 
 @add_command("ptak", "Poka ptaka.", channel="fortunki", aliases=["p", "xxx"])
 async def ptak_cmd(message: IncomingMessage):
-    await send_random_image(message, PLUGIN_NAME_PTAK, "Mem w koronie")
+    await send_random_image(message, PLUGIN_NAME_PTAK, "Ptak Marcina")
 
 
 @add_command(
