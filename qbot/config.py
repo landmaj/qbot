@@ -4,7 +4,7 @@ LOGGING = {
     "formatters": {
         "default": {
             "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": "%(levelprefix)s %(message)s",
+            "fmt": "%(levelprefix)s logger=%(name)s %(message)s",
             "use_colors": None,
         }
     },
