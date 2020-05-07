@@ -32,7 +32,6 @@ class AppMode:
 def main(mode):
     setup_logging()
 
-    logging.info(f"Application startup mode: {mode}.")
     import qbot.plugins  # noqa
 
     if mode == AppMode.SERVER:

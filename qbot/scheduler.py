@@ -18,7 +18,6 @@ def job(timer: Optional[float] = None):
     def decorator(function):
         @wraps(function)
         async def wrapper():
-            logger.info(f"Running job: '{function.__module__}.{function.__name__}'.")
             try:
                 result = await function()
             except Exception:
@@ -26,9 +25,6 @@ def job(timer: Optional[float] = None):
                     f"Job '{function.__module__}.{function.__name__}' failed!"
                 )
             else:
-                logger.info(
-                    f"Job finished: '{function.__module__}.{function.__name__}'."
-                )
                 return result
 
         wrapper.timer = timer
@@ -41,7 +37,6 @@ def job(timer: Optional[float] = None):
 
 async def _run_jobs():
     await registry.setup()
-    logger.info("Started scheduler process.")
     while True:
         tasks = []
         for func, next_run_on in _JOBS.items():
