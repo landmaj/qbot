@@ -20,7 +20,7 @@ from qbot.utils import verify_signature
 
 class Index(HTTPEndpoint):
     async def get(self, request: Request) -> Response:
-        return PlainTextResponse("☆ﾐ(o*･ω･)ﾉ Welcome to the future!")
+        return PlainTextResponse("Welcome to the future!")
 
     async def post(self, request: Request) -> Response:
         try:

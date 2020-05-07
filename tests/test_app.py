@@ -7,7 +7,7 @@ from qbot.core import registry
 async def test_index(client):
     response = await client.get("/")
     assert response.status_code == 200
-    assert response.text == "☆ﾐ(o*･ω･)ﾉ Welcome to the future!"
+    assert response.text == "Welcome to the future!"
 
 
 @pytest.mark.asyncio
