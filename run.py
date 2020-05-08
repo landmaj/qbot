@@ -7,13 +7,13 @@ import click
 import uvicorn
 from starlette.config import environ
 
-import qbot.config
+import qbot.logging
 from qbot import scheduler
 from qbot.app import app
 
 
 def setup_logging():
-    logging.config.dictConfig(qbot.config.LOGGING)
+    logging.config.dictConfig(qbot.logging.CONFIG)
 
 
 HOST = os.environ.get("HOST", "0.0.0.0")
@@ -35,7 +35,7 @@ def main(mode):
     import qbot.plugins  # noqa
 
     if mode == AppMode.SERVER:
-        uvicorn.run(app, host=HOST, port=int(PORT))
+        uvicorn.run(app, host=HOST, port=int(PORT), log_config=None)
     elif mode == AppMode.SCHEDULER:
         scheduler.run()
     else:
