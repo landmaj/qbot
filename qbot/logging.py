@@ -39,7 +39,7 @@ class LokiFormatter(logging.Formatter):
 
     def __init__(
         self,
-        fmt: Optional[str] = "%(levelname)s %(name)s %(message)s",
+        fmt: Optional[str] = "%(level)s %(logger)s %(message)s",
         datefmt: Optional[str] = None,
         style: str = "%",
     ) -> None:
@@ -61,10 +61,24 @@ class LokiFormatter(logging.Formatter):
     def formatMessage(self, record: logging.LogRecord) -> str:
         level_name = self.color_level_name(record.levelname, record.levelno)
         separator = " " * (8 - len(record.levelname))
-        record.__dict__["levelname"] = level_name + separator
+        record.level = level_name + separator
 
-        logger = record.name
-        record.__dict__["name"] = f"{self.color_label('logger=' + logger)}"
+        record.logger = record.name
+        for attr in {
+            "filename",
+            "funcName",
+            "levelno",
+            "lineno",
+            "module",
+            "logger",
+            "pathname",
+            "process",
+            "processName",
+            "thread",
+            "threadName",
+        }:
+            value = record.__dict__[attr]
+            record.__dict__[attr] = self.color_label(f"{attr}={value}")
 
         return super().formatMessage(record)
 
