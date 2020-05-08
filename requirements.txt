@@ -36,6 +36,7 @@ mako==1.1.1               # via alembic
 markupsafe==1.1.1         # via mako
 parse==1.14.0             # via requests-html
 passlib==1.7.2
+prometheus-client==0.7.1  # via starlette-prometheus
 psycopg2-binary==2.8.4    # via databases
 psycopg2==2.8.4
 pydantic==1.4
@@ -52,6 +53,7 @@ six==1.14.0               # via b2sdk, logfury, python-dateutil, validators, w3l
 sniffio==1.1.0            # via httpx
 soupsieve==1.9.5          # via beautifulsoup4
 sqlalchemy==1.3.13
+starlette-prometheus==0.6.0
 starlette==0.13.1
 tqdm==4.42.1              # via b2sdk, pyppeteer
 urllib3==1.25.8           # via httpx, pyppeteer, requests
