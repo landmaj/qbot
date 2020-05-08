@@ -58,20 +58,11 @@ async def login(request: Request) -> Response:
     return PlainTextResponse(f"Hello, {request.user.display_name}")
 
 
-async def exc(request: Request) -> Response:
-    try:
-        2 / 0
-    except ZeroDivisionError:
-        logging.exception("Something bad happened!")
-    return PlainTextResponse("OK")
-
-
 app = Starlette(
     routes=[
         Route("/", Index),
         Route("/login", login),
         Route("/image/{plugin}", random_image),
-        Route("/exc", exc),
     ],
     middleware=[Middleware(AuthenticationMiddleware, backend=BasicAuthBackend())],
 )
