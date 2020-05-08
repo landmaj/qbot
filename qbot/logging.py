@@ -61,7 +61,7 @@ class LokiFormatter(logging.Formatter):
     def formatMessage(self, record: logging.LogRecord) -> str:
         level_name = self.color_level_name(record.levelname, record.levelno)
         separator = " " * (8 - len(record.levelname))
-        record.__dict__["levelname"] = level_name + ": " + separator
+        record.__dict__["levelname"] = level_name + separator
 
         logger = record.name
         record.__dict__["name"] = f"{self.color_label('logger=' + logger)}"
