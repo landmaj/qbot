@@ -64,7 +64,7 @@ app = Starlette(
         Route("/", Index),
         Route("/login", login),
         Route("/image/{plugin}", random_image),
-        Route("/metrics", metrics),
+        Route("/metrics", requires("authenticated")(metrics)),
     ],
     middleware=[
         Middleware(AuthenticationMiddleware, backend=BasicAuthBackend()),
