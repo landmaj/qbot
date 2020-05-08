@@ -4,7 +4,7 @@ from typing import Optional
 
 import click
 
-LINE_SEPARATOR = "\u2028"
+LINE_SEPARATOR = "\u000d\u000b"
 
 CONFIG = {
     "version": 1,
