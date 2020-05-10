@@ -11,6 +11,7 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, RedirectResponse, Response
 from starlette.routing import Route
 from starlette_prometheus import PrometheusMiddleware, metrics
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from qbot.auth import BasicAuthBackend
 from qbot.core import registry
@@ -69,6 +70,7 @@ app = Starlette(
     middleware=[
         Middleware(AuthenticationMiddleware, backend=BasicAuthBackend()),
         Middleware(PrometheusMiddleware),
+        Middleware(ProxyHeadersMiddleware),
     ],
 )
 
