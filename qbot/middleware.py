@@ -13,11 +13,16 @@ class CloudflareMiddleware:
                 scope["scheme"] = x_forwarded_proto.strip()
 
             if b"cf-connecting-ip" in headers:
-                # Determine the client address from the last trusted IP in the
-                # X-Forwarded-For header. We've lost the connecting client's port
-                # information by now, so only include the host.
+                # Determine the client address from the CF-Connecting-IP header.
+                # We've lost the connecting client's port # information by now,
+                # so only include the host.
                 host = headers[b"cf-connecting-ip"].decode("ascii")
                 port = 0
                 scope["client"] = (host, port)
+
+            if b"cf-ipcountry" in headers:
+                # Determine the client country from the CF-IPCountry header.
+                country_code = headers[b"cf-ipcountry"].decode("ascii")
+                scope["country_code"] = country_code
 
         return await self.app(scope, receive, send)
