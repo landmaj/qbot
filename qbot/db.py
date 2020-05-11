@@ -93,7 +93,7 @@ async def b2_images_interim_insert(plugin: str, urls: str) -> str:
     validated, rejected = [], []
     for line in urls.split("\n"):
         # for some reason Slack adds triangular brackets to URLs
-        line = line.strip("<> ")
+        line = line.strip("<> ").split("|")[0]
         if validators.url(line):
             validated.append(line)
         else:
