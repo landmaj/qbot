@@ -100,7 +100,11 @@ async def _upload_image(url: str, plugin: str) -> Optional[str]:
             allow_redirects=False,  # to avoid login screen
         )
     else:
-        resp = await registry.http_client.get(url)
+        headers = {
+            # moodiedavittreport.com returns 403 with default user-agent
+            "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0"
+        }
+        resp = await registry.http_client.get(url, headers=headers)
     if not 200 <= resp.status_code < 300:
         await send_message(
             OutgoingMessage(
