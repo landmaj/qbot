@@ -1,3 +1,4 @@
+from collections import defaultdict
 from html import unescape
 from typing import List, Optional
 
@@ -121,11 +122,13 @@ async def b2_images_interim_insert_from_slack(plugin: str, files: List[dict]) ->
     return response
 
 
+_cache = defaultdict(set)
+
+
 async def query_with_recently_seen(
-    table: Table, identifier: Optional[int] = None
+    table: Table, identifier: Optional[int] = None, where: Optional[str] = None
 ) -> Optional[dict]:
-    if not hasattr(table, "cache"):
-        table.cache = set()
+    key = table.name if not where else f"{table.name}_{hash(where)}"
 
     if identifier:
         result = await registry.database.fetch_one(
@@ -133,22 +136,22 @@ async def query_with_recently_seen(
         )
     else:
         query = table.select()
-        if len(table.cache) != 0:
-            query = query.where(table.c.id.notin_(table.cache))
+        if len(_cache[key]) > 0:
+            query = query.where(table.c.id.notin_(_cache[key]))
         query = query.order_by(func.random()).limit(1)
         result = await registry.database.fetch_one(query)
 
     if result is None:
         return
-
-    table_size = await count(table)
-    if table_size > 1:
-        if len(table.cache) >= table_size - 1:
-            table.cache = {result["id"]}
-        else:
-            table.cache.add(result["id"])
-
-    return result
+    else:
+        table_size = await count(table)
+        if table_size > 1:
+            if len(_cache[key]) >= table_size - 1:
+                _cache[key] = {result["id"]}
+            else:
+                _cache[key].add(result["id"])
+        print(_cache[key])
+        return result
 
 
 async def count(table: Table) -> int:
