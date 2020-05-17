@@ -17,6 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.sql import text
 
 from qbot.core import registry
 
@@ -129,22 +130,23 @@ async def query_with_recently_seen(
     table: Table, identifier: Optional[int] = None, where: Optional[str] = None
 ) -> Optional[dict]:
     key = table.name if not where else f"{table.name}_{hash(where)}"
-
+    query = table.select()
+    if where:
+        query = query.where(text(where))
     if identifier:
-        result = await registry.database.fetch_one(
-            table.select().where(table.c.id == identifier)
-        )
+        query = query.where(table.c.id == identifier)
     else:
-        query = table.select()
         if len(_cache[key]) > 0:
             query = query.where(table.c.id.notin_(_cache[key]))
         query = query.order_by(func.random()).limit(1)
-        result = await registry.database.fetch_one(query)
-
+    result = await registry.database.fetch_one(query)
     if result is None:
         return
     else:
-        table_size = await count(table)
+        if where:
+            table_size = await count(table, where)
+        else:
+            table_size = await count(table)
         if table_size > 1:
             if len(_cache[key]) >= table_size - 1:
                 _cache[key] = {result["id"]}
@@ -154,8 +156,11 @@ async def query_with_recently_seen(
         return result
 
 
-async def count(table: Table) -> int:
-    return await registry.database.fetch_val(select([func.count()]).select_from(table))
+async def count(table: Table, where: Optional[str] = None) -> int:
+    query = select([func.count()]).select_from(table)
+    if where:
+        query = query.where(text(where))
+    return await registry.database.fetch_val(query)
 
 
 async def b2_images_count(plugin: str) -> int:

@@ -20,7 +20,7 @@ async def fortunka_cmd(message: IncomingMessage):
         except ValueError:
             await send_reply(message, text="Niepoprawne ID.")
             return
-    result = await query_with_recently_seen(fortunki, identifier)
+    result = await query_with_recently_seen(table=fortunki, identifier=identifier)
     if result is None:
         await send_reply(
             message, text="Do 2137 fortunek jeszcze trochę. Tej o którą prosisz nie ma."
