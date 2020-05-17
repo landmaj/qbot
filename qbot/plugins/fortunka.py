@@ -3,7 +3,7 @@ from asyncpg import UniqueViolationError
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
-from qbot.db import add_recently_seen, fortunki, query_with_recently_seen
+from qbot.db import fortunki, query_with_recently_seen
 from qbot.message import Image, IncomingMessage, TextWithButton, send_reply
 
 PLUGIN_NAME = "fortunka"
@@ -38,7 +38,6 @@ async def fortunka_cmd(message: IncomingMessage):
             message,
             blocks=[TextWithButton(text=result["text"], button_text=str(result["id"]))],
         )
-    await add_recently_seen(fortunki, result["id"])
 
 
 @add_command(

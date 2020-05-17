@@ -1,5 +1,5 @@
 from html import unescape
-from typing import List, Optional, Set
+from typing import List, Optional
 
 import sqlalchemy
 import validators
@@ -74,21 +74,6 @@ credentials = sqlalchemy.Table(
 )
 
 
-async def query_with_recently_seen(
-    table: Table, identifier: Optional[int] = None
-) -> Optional[dict]:
-    if identifier:
-        return await registry.database.fetch_one(
-            table.select().where(table.c.id == identifier)
-        )
-    recently_seen = await get_recently_seen(table)
-    query = table.select()
-    if len(recently_seen) != 0:
-        query = query.where(table.c.id.notin_(recently_seen))
-    query = query.order_by(func.random()).limit(1)
-    return await registry.database.fetch_one(query)
-
-
 async def b2_images_interim_insert(plugin: str, urls: str) -> str:
     validated, rejected = [], []
     for line in urls.split("\n"):
@@ -136,28 +121,34 @@ async def b2_images_interim_insert_from_slack(plugin: str, files: List[dict]) ->
     return response
 
 
-async def get_recently_seen(table: Table) -> Set[int]:
+async def query_with_recently_seen(
+    table: Table, identifier: Optional[int] = None
+) -> Optional[dict]:
     if not hasattr(table, "cache"):
         table.cache = set()
-    return table.cache
 
-
-async def add_recently_seen(table: Table, value: int) -> None:
-    if not hasattr(table, "max_cache_size"):
-        await _set_max_cache_size(table)
-    if len(await get_recently_seen(table)) >= table.max_cache_size != 0:
-        await _set_max_cache_size(table)
-        table.cache = {value}
-    elif table.max_cache_size != 0:
-        table.cache.add(value)
-
-
-async def _set_max_cache_size(table: Table):
-    cnt = await count(table)
-    if cnt == 0:
-        table.max_cache_size = 0
+    if identifier:
+        result = await registry.database.fetch_one(
+            table.select().where(table.c.id == identifier)
+        )
     else:
-        table.max_cache_size = cnt - 1
+        query = table.select()
+        if len(table.cache) != 0:
+            query = query.where(table.c.id.notin_(table.cache))
+        query = query.order_by(func.random()).limit(1)
+        result = await registry.database.fetch_one(query)
+
+    if result is None:
+        return
+
+    table_size = await count(table)
+    if table_size > 1:
+        if len(table.cache) >= table_size - 1:
+            table.cache = {result["id"]}
+        else:
+            table.cache.add(result["id"])
+
+    return result
 
 
 async def count(table: Table) -> int:
