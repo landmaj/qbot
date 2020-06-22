@@ -10,6 +10,8 @@ from qbot.message import IncomingMessage
 COMMANDS = {}
 ALIASES = {}
 DESCRIPTIONS = defaultdict(lambda: defaultdict())
+FUZZY_COMMANDS = {}
+FUZZY_ALIASES = {}
 
 
 def add_command(
@@ -48,10 +50,13 @@ def add_command(
 
         wrapper.channel = channel
         COMMANDS[keyword] = wrapper
+        if safe_to_fix:
+            FUZZY_COMMANDS[keyword] = wrapper
         for alias in aliases:
             ALIASES[alias] = wrapper
+            if safe_to_fix:
+                FUZZY_ALIASES[alias] = wrapper
         DESCRIPTIONS[channel][keyword] = description
-        wrapper.safe_to_fix = safe_to_fix
 
         return wrapper
 
@@ -63,10 +68,10 @@ def fuzzy_match(
     mistyped_command: str, score_cutoff: int = 75
 ) -> Optional[Tuple[str, int]]:
     match = process.extractBests(
-        mistyped_command, COMMANDS.keys(), score_cutoff=score_cutoff, limit=1
+        mistyped_command, FUZZY_COMMANDS.keys(), score_cutoff=score_cutoff, limit=1
     )
     if len(match) == 0:
         match = process.extractBests(
-            mistyped_command, ALIASES.keys(), score_cutoff=score_cutoff, limit=1
+            mistyped_command, FUZZY_ALIASES.keys(), score_cutoff=score_cutoff, limit=1
         )
     return match[0] if len(match) != 0 else None
