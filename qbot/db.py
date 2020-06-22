@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from html import unescape
 from typing import List, Optional
@@ -107,6 +108,7 @@ async def b2_images_interim_insert_from_slack(plugin: str, files: List[dict]) ->
         mimetype: str = f["mimetype"]
         url: str = f["url_private"]
         if mimetype.split("/")[0] != "image":
+            logging.error(f"Incorrect MIME type ({mimetype}) for file: {url}.")
             errors.append(url)
             continue
         urls.append(url)
