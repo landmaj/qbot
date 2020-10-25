@@ -15,4 +15,5 @@ setup(
     author_email="michal@w-ski.dev",
     install_requires=requirements,
     extras_require={"dev": dev_requirements},
+    entry_points={"console_scripts": ["qbot=qbot.run:main"]},
 )

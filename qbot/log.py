@@ -9,7 +9,7 @@ LINE_SEPARATOR = "\u000d\u000b"
 CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {"default": {"()": "qbot.logging.LokiFormatter"}},
+    "formatters": {"default": {"()": "qbot.log.LokiFormatter"}},
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",

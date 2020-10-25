@@ -1,9 +1,6 @@
 name: build
 
-on:
-  push:
-    branches:
-      - master
+on: push
 
 jobs:
   pytest:
@@ -17,7 +14,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python
@@ -46,7 +43,7 @@ jobs:
         alembic downgrade base
 
   lint:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python
@@ -66,15 +63,3 @@ jobs:
       - name: Run black
         run: |
           pre-commit run black --all-files --show-diff-on-failure
-  deploy:
-    needs: [pytest, lint]
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v1
-      - name: Push to Dokku
-        uses: landmaj/github-action-dokku@master
-        with:
-          PRIVATE_KEY: ${{ secrets.DOKKU_PRIVATE_KEY }}
-          PUBLIC_KEY: ${{ secrets.DOKKU_PUBLIC_KEY }}
-          HOST: ${{ secrets.DOKKU_HOST }}
-          PROJECT: qbot

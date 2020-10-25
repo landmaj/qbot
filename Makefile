@@ -26,10 +26,10 @@ test:
 	$(CMD) pytest
 
 run-webapp:
-	$(CMD) python run.py --server
+	$(CMD) python qbot/run.py --server
 
 run-scheduler:
-	$(CMD) python run.py --scheduler
+	$(CMD) python qbot/run.py --scheduler
 
 format:
 	pre-commit run --all-files
@@ -41,3 +41,7 @@ compile_requirements:
 msg = $(error USAGE: make migration msg="commit message")
 migration:
 	$(CMD) alembic revision --autogenerate -m "$(msg)"
+
+
+build_image:
+	docker build . -t qbot
