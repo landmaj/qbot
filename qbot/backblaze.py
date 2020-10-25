@@ -4,10 +4,10 @@ from typing import Optional
 
 from b2sdk.bucket import Bucket
 from b2sdk.v1 import B2Api, InMemoryAccountInfo
-from vendor.imghdr import what
 
 from qbot.core import registry
 from qbot.db import b2_images
+from vendor.imghdr import what
 
 
 @dataclass

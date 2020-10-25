@@ -2,8 +2,6 @@ import logging
 from datetime import datetime, timedelta
 from typing import Optional
 
-from vendor import facebook_scraper
-
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
@@ -17,6 +15,7 @@ from qbot.message import (
     send_random_image,
 )
 from qbot.scheduler import job
+from vendor import facebook_scraper
 
 logger = logging.getLogger(__name__)
 PLUGIN_NAME = "sucharki"
