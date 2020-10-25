@@ -42,6 +42,7 @@ msg = $(error USAGE: make migration msg="commit message")
 migration:
 	$(CMD) alembic revision --autogenerate -m "$(msg)"
 
-
 build_image:
-	docker build . -t qbot
+	docker build . -t landmaj/qbot
+push_image:
+	docker push landmaj/qbot:latest
