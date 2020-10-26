@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
+from qbot.cron import cron_job
 from qbot.db import (
     b2_images_interim,
     b2_images_interim_insert,
@@ -19,7 +20,6 @@ from qbot.message import (
     send_random_image,
     send_reply,
 )
-from qbot.scheduler import job
 
 logger = logging.getLogger(__name__)
 PLUGIN_NAME_NOSACZE = "nosacze"
@@ -133,7 +133,7 @@ async def _upload_image(url: str, plugin: str) -> Optional[str]:
     return b2_image.url
 
 
-@job(60)
+@cron_job
 async def _upload_from_interim():
     for _ in range(await count(b2_images_interim)):
         async with registry.database.transaction():

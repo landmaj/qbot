@@ -5,6 +5,7 @@ from typing import Optional
 from qbot.backblaze import upload_image
 from qbot.command import add_command
 from qbot.core import registry
+from qbot.cron import cron_job
 from qbot.db import b2_images
 from qbot.message import (
     Image,
@@ -14,7 +15,6 @@ from qbot.message import (
     send_message,
     send_random_image,
 )
-from qbot.scheduler import job
 from vendor import facebook_scraper
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> Optional[
     return b2_image.url
 
 
-@job(300)
+@cron_job
 async def get_latest():
     current_time = datetime.utcnow()
     async for post in facebook_scraper.get_posts("psiesucharki", pages=1):

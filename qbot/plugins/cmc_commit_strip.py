@@ -4,9 +4,9 @@ import feedparser
 from requests_html import HTML
 
 from qbot.core import registry
+from qbot.cron import cron_job
 from qbot.db import plugin_storage
 from qbot.message import Image, OutgoingMessage, Text, send_message
-from qbot.scheduler import job
 
 PLUGIN_NAME = "commitstrip"
 LATEST_COMIC_KEY = "latest_comic"
@@ -14,7 +14,7 @@ LATEST_COMIC_KEY = "latest_comic"
 logger = logging.getLogger(__name__)
 
 
-@job(3600)
+@cron_job
 async def commitstrip():
     last_seen_comic = await registry.database.fetch_val(
         plugin_storage.select().where(

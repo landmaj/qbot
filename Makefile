@@ -28,8 +28,8 @@ test:
 run-webapp:
 	$(CMD) python qbot/run.py --server
 
-run-scheduler:
-	$(CMD) python qbot/run.py --scheduler
+run-cron:
+	$(CMD) python qbot/run.py --cron
 
 format:
 	pre-commit run --all-files
