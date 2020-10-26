@@ -22,7 +22,17 @@ class Registry:
 
         self.SLACK_SIGNING_SECRET = self.config("SLACK_SIGNING_SECRET", cast=Secret)
         self.SLACK_TOKEN = self.config("SLACK_TOKEN", cast=Secret)
-        self.DATABASE_URL = self.config("DATABASE_URL", cast=Secret)
+
+        self.DATABASE_URL = self.config("DATABASE_URL", cast=Secret, default=None)
+        if self.DATABASE_URL is None:
+            user = self.config("PG_USER", default="postgres")
+            password = self.config("PG_PASS", default="postgres")
+            host = self.config("PG_HOST", default="localhost")
+            port = self.config("PG_PORT", default="5432")
+            database = self.config("PG_NAME", default="postgres")
+            self.DATABASE_URL = Secret(
+                f"postgresql://{user}:{password}@{host}:{port}/{database}"
+            )
 
         self.CHANNEL_FORTUNKI = self.config("CHANNEL_FORTUNKI")
         self.CHANNEL_COMICS = self.config("CHANNEL_COMICS")

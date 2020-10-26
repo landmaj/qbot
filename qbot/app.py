@@ -63,7 +63,7 @@ async def login(request: Request) -> Response:
 async def ping(request: Request) -> Response:
     try:
         await registry.database.execute("SELECT 1")
-    except ConnectionRefusedError:
+    except Exception:
         return PlainTextResponse("Oops...", status_code=500)
     return PlainTextResponse(f"Pong!")
 
