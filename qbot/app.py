@@ -60,11 +60,20 @@ async def login(request: Request) -> Response:
     return PlainTextResponse(f"Hello, {request.user.display_name}")
 
 
+async def ping(request: Request) -> Response:
+    try:
+        await registry.database.execute("SELECT 1")
+    except ConnectionRefusedError:
+        return PlainTextResponse("Oops...", status_code=500)
+    return PlainTextResponse(f"Pong!")
+
+
 app = Starlette(
     routes=[
         Route("/", Index),
         Route("/login", login),
         Route("/image/{plugin}", random_image),
+        Route("/ping", ping),
         Route("/metrics", requires("authenticated")(metrics)),
     ],
     middleware=[
