@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime, timedelta
 from typing import Optional
 
 from qbot.backblaze import upload_image
@@ -37,36 +36,34 @@ async def add_sucharek(image: bytes, post_id: Optional[str] = None) -> Optional[
 
 @cron_job
 async def get_latest():
-    current_time = datetime.utcnow()
     async for post in facebook_scraper.get_posts("psiesucharki", pages=1):
-        if current_time - timedelta(hours=1) < post.time and post.image:
-            result = await registry.database.fetch_one(
-                b2_images.select().where(
-                    (b2_images.c.plugin == PLUGIN_NAME) & (b2_images.c.extra == post.id)
-                )
+        if post.image is None:
+            continue
+        result = await registry.database.fetch_one(
+            b2_images.select().where(
+                (b2_images.c.plugin == PLUGIN_NAME) & (b2_images.c.extra == post.id)
             )
-            if result is not None:
-                continue
-            try:
-                resp = await registry.http_client.get(post.image)
-            except Exception:
-                logger.exception("Exception during Facebook image request.")
-                continue
-            if not 200 <= resp.status_code < 400:
-                logger.error(
-                    f"Incorrect response from Facebook. Status: {resp.status}."
-                )
-                continue
-            download_url = await add_sucharek(resp.content, post.id)
-            if download_url is None:
-                logger.error("Failed to upload a new sucharek.")
-            await send_message(
-                OutgoingMessage(
-                    channel=registry.CHANNEL_COMICS,
-                    thread_ts=None,
-                    blocks=[
-                        Text("Nowy sucharek!"),
-                        Image(image_url=download_url, alt_text=post.text),
-                    ],
-                )
+        )
+        if result is not None:
+            continue
+        try:
+            resp = await registry.http_client.get(post.image)
+        except Exception:
+            logger.exception("Exception during Facebook image request.")
+            continue
+        if not 200 <= resp.status_code < 400:
+            logger.error(f"Incorrect response from Facebook. Status: {resp.status}.")
+            continue
+        download_url = await add_sucharek(resp.content, post.id)
+        if download_url is None:
+            logger.error("Failed to upload a new sucharek.")
+        await send_message(
+            OutgoingMessage(
+                channel=registry.CHANNEL_COMICS,
+                thread_ts=None,
+                blocks=[
+                    Text("Nowy sucharek!"),
+                    Image(image_url=download_url, alt_text=post.text),
+                ],
             )
+        )
