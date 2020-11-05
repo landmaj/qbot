@@ -5,7 +5,7 @@ from qbot.message import IncomingMessage, send_reply
 
 
 @add_command(
-    "sasin", "Konwersja PLN → sasin. Użycie: `!sasin -- NUMBER`", safe_to_fix=True
+    "sasin", "Konwersja PLN → sasin. Użycie: `!sasin -- NUMBER`", safe_to_fix=False
 )
 async def sasin_command(message: IncomingMessage) -> None:
     if not message.text:
