@@ -84,6 +84,7 @@ game = sqlalchemy.Table(
     Column("timestamp", DateTime, nullable=False),
     Column("active", Boolean, nullable=False),
     Column("data", MutableDict.as_mutable(JSONB)),
+    Column("reminders_sent", Boolean, default=False),
 )
 
 

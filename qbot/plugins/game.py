@@ -1,3 +1,4 @@
+from asyncio import sleep
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import partial
@@ -10,7 +11,13 @@ from qbot.command import add_command as _add_command
 from qbot.core import registry
 from qbot.cron import cron_job
 from qbot.db import game as GameTable
-from qbot.message import IncomingMessage, send_reply
+from qbot.message import (
+    IncomingMessage,
+    OutgoingMessage,
+    Text,
+    send_message,
+    send_reply,
+)
 
 add_command = partial(
     _add_command,
@@ -28,6 +35,7 @@ class Game:
     timestamp: datetime
     name: str
     players: List[str]
+    reminders_sent: Optional[bool]
 
 
 async def _active_game_exists() -> bool:
@@ -46,6 +54,7 @@ async def _get_game_details() -> Game:
         timestamp=result["timestamp"],
         name=result["data"]["name"],
         players=result["data"]["players"],
+        reminders_sent=result["reminders_sent"],
     )
 
 
@@ -122,7 +131,13 @@ async def game_create(message: IncomingMessage) -> Any:
 
     name = message_parts[-1]
     await _add_game(
-        Game(id=None, timestamp=dt_utc.replace(tzinfo=None), name=name, players=[])
+        Game(
+            timestamp=dt_utc.replace(tzinfo=None),
+            name=name,
+            players=[],
+            id=None,
+            reminders_sent=False,
+        )
     )
     await send_reply(message, text="Game created.")
     return await game_details(message)
@@ -166,5 +181,58 @@ async def reminder():
     if not await _active_game_exists():
         return
     game = await _get_game_details()
-    if game.timestamp >= datetime.utcnow() - timedelta(minutes=10):
-        pass
+    while game.timestamp <= datetime.utcnow() + timedelta(minutes=10):
+        if game.timestamp <= datetime.utcnow():
+            await _cancel_game(game)
+            await send_message(
+                OutgoingMessage(
+                    channel=registry.CHANNEL_GEJMING,
+                    thread_ts=None,
+                    blocks=[
+                        Text(f"It is time for {game.name}!"),
+                    ],
+                )
+            )
+            players = " ".join([f"<@{player}>" for player in game.players])
+            await send_message(
+                OutgoingMessage(
+                    channel=registry.CHANNEL_GEJMING,
+                    thread_ts=None,
+                    blocks=[
+                        Text(f"Calling: {players}"),
+                    ],
+                )
+            )
+            return
+        await sleep(30)
+        if not await _active_game_exists():
+            return
+        game = await _get_game_details()
+
+
+@cron_job
+async def user_reminder():
+    if not await _active_game_exists():
+        return
+    game = await _get_game_details()
+    if (
+        game.timestamp <= datetime.utcnow() + timedelta(minutes=30)
+        and not game.reminders_sent
+    ):
+        await registry.database.execute(
+            GameTable.update()
+            .where(GameTable.c.id == game.id)
+            .values(reminders_sent=True)
+        )
+        for player in game.players:
+            await send_message(
+                OutgoingMessage(
+                    channel=player,
+                    thread_ts=None,
+                    blocks=[
+                        Text(
+                            f"You have a game ({game.name}) starting in less than half an hour."
+                        ),
+                    ],
+                )
+            )
