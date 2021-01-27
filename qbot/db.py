@@ -8,6 +8,7 @@ import validators
 from sqlalchemy import (
     Boolean,
     Column,
+    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -74,6 +75,15 @@ credentials = sqlalchemy.Table(
     metadata,
     Column("login", Text, primary_key=True),
     Column("password", Text, nullable=False),
+)
+
+game = sqlalchemy.Table(
+    "game",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("timestamp", DateTime, nullable=False),
+    Column("active", Boolean, nullable=False),
+    Column("data", MutableDict.as_mutable(JSONB)),
 )
 
 
