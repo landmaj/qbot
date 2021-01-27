@@ -1,11 +1,10 @@
-import asyncio
 from collections import defaultdict
 from functools import lru_cache, wraps
 from typing import List, Optional, Tuple
 
 from fuzzywuzzy import process
 
-from qbot.message import IncomingMessage
+from qbot.message import IncomingMessage, send_reply
 
 COMMANDS = {}
 ALIASES = {}
@@ -45,7 +44,7 @@ def add_command(
                 and message.channel_name != "im"
                 and wrapper.channel != message.channel_name
             ):
-                return asyncio.sleep(0)
+                return send_reply(message, text="Niewłaściwy kanał.")
             return function(message)
 
         wrapper.channel = channel

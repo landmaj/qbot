@@ -36,6 +36,7 @@ class Registry:
 
         self.CHANNEL_FORTUNKI = self.config("CHANNEL_FORTUNKI")
         self.CHANNEL_COMICS = self.config("CHANNEL_COMICS")
+        self.CHANNEL_GEJMING = self.config("CHANNEL_GEJMING")
 
     async def setup(self):
         self.set_config_vars()
